@@ -141,6 +141,28 @@ lib.makeScope
             gnupatch = gnupatch-mes;
             gnused = gnused-mes;
           };
+
+          tinycc-musl = lib.recurseIntoAttrs (i386self.callPackage ./tinycc/musl.nix {
+            bash = bash-mes;
+            tinycc = tinycc-bootstrappable;
+            musl = musl;
+            gnupatch = gnupatch-mes;
+          });
+
+          musl-tcc = i386self.callPackage ./musl/tcc-musl.nix {
+            bash = bash-mes;
+            tinycc = tinycc-musl;
+            gnumake = gnumake-mes;
+            gnupatch = gnupatch-mes;
+            gnused = gnused-mes;
+          };
+
+          tinycc-musl-v2 = lib.recurseIntoAttrs (i386self.callPackage ./tinycc/musl-v2.nix {
+            bash = bash-mes;
+            tinycc = tinycc-musl;
+            musl = musl-tcc;
+            gnupatch = gnupatch-mes;
+          });
         });
 
       # Early bootstrap stages run as i386
@@ -166,6 +188,9 @@ lib.makeScope
         bash-mes
         tinycc-for-musl-mes
         musl
+        tinycc-musl
+        musl-tcc
+        tinycc-musl-v2
         ;
 
       inherit (callPackage ./utils.nix { }) derivationWithMeta writeTextFile writeText;
