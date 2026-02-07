@@ -7,6 +7,14 @@
   checkMeta,
 }:
 
+let
+  # Force i386 for early bootstrap stages even on x86_64
+  i386Platform = lib.systems.elaborate "i686-linux";
+  useI386Bootstrap = hostPlatform.system == "x86_64-linux";
+
+  earlyBootstrapPlatform = if useI386Bootstrap then i386Platform else hostPlatform;
+in
+
 lib.makeScope
   # Prevent using top-level attrs to protect against introducing dependency on
   # non-bootstrap packages by mistake. Any top-level inputs must be explicitly
@@ -23,12 +31,52 @@ lib.makeScope
           fetchurl
           checkMeta
           ;
+        inherit earlyBootstrapPlatform useI386Bootstrap;
       }
       // extra
     )
   )
   (
     self: with self; {
+
+      i386Bootstrap = lib.makeScope
+        (extra: lib.callPackageWith ({
+          inherit lib config fetchurl checkMeta;
+          buildPlatform = i386Platform;
+          hostPlatform = i386Platform;
+        } // extra))
+        (i386self: with i386self; {
+          stage0-posix = i386self.callPackage ./stage0-posix { };
+
+          inherit (i386self.stage0-posix)
+            kaem
+            m2libc
+            mescc-tools
+            mescc-tools-extra
+            ;
+
+          inherit (i386self.callPackage ./utils.nix { }) derivationWithMeta writeTextFile writeText;
+
+          ln-boot = i386self.callPackage ./ln-boot { };
+
+          mes = i386self.callPackage ./mes { };
+          mes-libc = i386self.callPackage ./mes/libc.nix { };
+
+          # Empty mes/config.h to avoid typedef conflicts
+          mes-config-h-override = kaem.runCommand "mes-config-h-override" { } ''
+            mkdir -p ''${out}/mes
+            catm ''${out}/mes/config.h
+          '';
+
+          tinycc-bootstrappable = lib.recurseIntoAttrs (i386self.callPackage ./tinycc/bootstrappable.nix { });
+          tinycc-mes = lib.recurseIntoAttrs (i386self.callPackage ./tinycc/mes.nix { });
+
+          tinycc-0_9_27 = i386self.callPackage ./tinycc/0.9.27.nix {
+            inherit mes-config-h-override;
+          };
+
+          gnumake-3_82 = i386self.callPackage ./gnumake/3.82.nix { tinycc = tinycc-0_9_27; };
+        });
 
       bash_2_05 = callPackage ./bash/2.nix { tinycc = tinycc-mes; };
 
@@ -280,10 +328,6 @@ lib.makeScope
 
       ln-boot = callPackage ./ln-boot { };
 
-      mes = callPackage ./mes { };
-
-      mes-libc = callPackage ./mes/libc.nix { };
-
       musl-tcc-intermediate = callPackage ./musl/tcc.nix {
         bash = bash_2_05;
         tinycc = tinycc-mes;
@@ -313,7 +357,9 @@ lib.makeScope
         gnutar = gnutar-latest;
       };
 
-      stage0-posix = callPackage ./stage0-posix { };
+      # On x86_64, use i386 bootstrap for early stages (matches live-bootstrap)
+      # On other platforms, use native bootstrap
+      stage0-posix = if useI386Bootstrap then i386Bootstrap.stage0-posix else callPackage ./stage0-posix { };
 
       inherit (self.stage0-posix)
         kaem
@@ -322,9 +368,28 @@ lib.makeScope
         mescc-tools-extra
         ;
 
-      tinycc-bootstrappable = lib.recurseIntoAttrs (callPackage ./tinycc/bootstrappable.nix { });
+      # Early bootstrap uses i386 on x86_64
+      tinycc-bootstrappable = if useI386Bootstrap
+        then i386Bootstrap.tinycc-bootstrappable
+        else lib.recurseIntoAttrs (callPackage ./tinycc/bootstrappable.nix { });
 
-      tinycc-mes = lib.recurseIntoAttrs (callPackage ./tinycc/mes.nix { });
+      tinycc-mes = if useI386Bootstrap
+        then i386Bootstrap.tinycc-mes
+        else lib.recurseIntoAttrs (callPackage ./tinycc/mes.nix { });
+
+      # TinyCC 0.9.27 matching live-bootstrap exactly
+      # Uses only mes-libc headers (no tcc headers in sysincludepaths)
+      # This avoids alloca declaration conflicts with older software
+      tinycc-0_9_27 = if useI386Bootstrap
+        then i386Bootstrap.tinycc-0_9_27
+        else callPackage ./tinycc/0.9.27.nix { };
+
+      gnumake-3_82 = if useI386Bootstrap
+        then i386Bootstrap.gnumake-3_82
+        else callPackage ./gnumake/3.82.nix { tinycc = tinycc-0_9_27; };
+
+      mes = if useI386Bootstrap then i386Bootstrap.mes else callPackage ./mes { };
+      mes-libc = if useI386Bootstrap then i386Bootstrap.mes-libc else callPackage ./mes/libc.nix { };
 
       tinycc-musl-intermediate = lib.recurseIntoAttrs (
         callPackage ./tinycc/musl.nix {
