@@ -104,6 +104,15 @@ lib.makeScope
             gnutar = gnutar-mes;
             gzip = gzip-mes;
           };
+
+          coreutils-5_0 = i386self.callPackage ./coreutils {
+            tinycc = tinycc-0_9_27;
+            gnumake = gnumake-3_82;
+            gnupatch = patch-2_5_9;
+            gnused = gnused-mes;
+            gnutar = gnutar-mes;
+            bzip2 = bzip2-mes;
+          };
         });
 
       bash_2_05 = callPackage ./bash/2.nix { tinycc = tinycc-mes; };
@@ -162,7 +171,7 @@ lib.makeScope
         gzip = gzip-mes;
       };
 
-      coreutils = callPackage ./coreutils { tinycc = tinycc-mes; };
+      coreutils = coreutils-5_0;
 
       coreutils-musl = callPackage ./coreutils/musl.nix {
         bash = bash_2_05;
@@ -407,6 +416,7 @@ lib.makeScope
         gnutar-mes
         gnused-mes
         bzip2-mes
+        coreutils-5_0
         ;
 
       tinycc-musl-intermediate = lib.recurseIntoAttrs (
@@ -461,6 +471,7 @@ lib.makeScope
           echo ${bzip2-mes.tests.get-version}
           echo ${bzip2.tests.get-version}
           echo ${bzip2-static.tests.get-version}
+          echo ${coreutils.tests.get-version}
           echo ${coreutils-musl.tests.get-version}
           echo ${coreutils-static.tests.get-version}
           echo ${diffutils.tests.get-version}
