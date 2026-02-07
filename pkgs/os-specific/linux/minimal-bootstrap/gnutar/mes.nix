@@ -1,13 +1,10 @@
 {
   lib,
-  buildPlatform,
-  hostPlatform,
   fetchurl,
-  bash,
+  kaem,
   tinycc,
   gnumake,
-  gnused,
-  gnugrep,
+  gzip,
 }:
 let
   inherit (import ./common.nix { inherit lib; }) meta;
@@ -20,43 +17,41 @@ let
     sha256 = "02m6gajm647n8l9a5bnld6fnbgdpyi4i3i83p7xcwv0kif47xhy6";
   };
 in
-bash.runCommand "${pname}-${version}"
+kaem.runCommand "${pname}-${version}"
   {
     inherit pname version meta;
 
     nativeBuildInputs = [
       tinycc.compiler
       gnumake
-      gnused
-      gnugrep
+      gzip
     ];
 
     passthru.tests.get-version =
       result:
-      bash.runCommand "${pname}-get-version-${version}" { } ''
+      kaem.runCommand "${pname}-get-version-${version}" { } ''
         ${result}/bin/tar --version
-        mkdir $out
+        mkdir ''${out}
       '';
   }
   ''
     # Unpack
-    ungz --file ${src} --output tar.tar
-    untar --file tar.tar
-    rm tar.tar
+    cp ${src} tar-${version}.tar.gz
+    ${gzip}/bin/gzip -d -f tar-${version}.tar.gz
+    untar --file tar-${version}.tar
+    rm tar-${version}.tar
     cd tar-${version}
 
-    # Configure
-    export CC="tcc -B ${tinycc.libs}/lib"
-    bash ./configure \
-      --build=${buildPlatform.config} \
-      --host=${hostPlatform.config} \
-      --disable-dependency-tracking \
-      --disable-nls \
-      --prefix=$out
+    cp ${./main.mk} Makefile
+    cp ${./getdate_stub.c} lib/getdate_stub.c
+    catm src/create.c.new ${./stat_override.c} src/create.c
+    cp src/create.c.new src/create.c
 
     # Build
-    make AR="tcc -ar"
+    ${gnumake}/bin/make CC="${tinycc.compiler}/bin/tcc -B ${tinycc.libs}/lib" AR="${tinycc.compiler}/bin/tcc -ar"
 
     # Install
-    make install
+    mkdir -p ''${out}/bin
+    cp tar ''${out}/bin/tar
+    chmod 555 ''${out}/bin/tar
   ''

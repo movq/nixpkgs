@@ -83,6 +83,12 @@ lib.makeScope
             gnumake = gnumake-3_82;
             gnupatch = patch-2_5_9;
           };
+
+          gnutar = i386self.callPackage ./gnutar/mes.nix {
+            tinycc = tinycc-0_9_27;
+            gnumake = gnumake-3_82;
+            inherit gzip;
+          };
         });
 
       bash_2_05 = callPackage ./bash/2.nix { tinycc = tinycc-mes; };
@@ -283,12 +289,6 @@ lib.makeScope
         gnutar = gnutar-latest;
       };
 
-      gnutar = callPackage ./gnutar/mes.nix {
-        bash = bash_2_05;
-        tinycc = tinycc-mes;
-        gnused = gnused-mes;
-      };
-
       # FIXME: better package naming scheme
       gnutar-latest = callPackage ./gnutar/latest.nix {
         gcc = gcc46;
@@ -373,6 +373,7 @@ lib.makeScope
         gnumake-3_82
         patch-2_5_9
         gzip
+        gnutar
         ;
 
       tinycc-musl-intermediate = lib.recurseIntoAttrs (
