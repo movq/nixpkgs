@@ -6,19 +6,25 @@
   bash,
   tinycc,
   gnumake,
+  gnupatch,
   gnused,
   gnugrep,
 }:
 let
   inherit (import ./common.nix { inherit lib; }) meta;
-  pname = "gnutar";
-  # >= 1.13 is incompatible with mes-libc
-  version = "1.12";
+  pname = "gawk-mes";
+  # >=3.1.x is incompatible with mes-libc
+  version = "3.0.6";
 
   src = fetchurl {
-    url = "mirror://gnu/tar/tar-${version}.tar.gz";
-    sha256 = "02m6gajm647n8l9a5bnld6fnbgdpyi4i3i83p7xcwv0kif47xhy6";
+    url = "mirror://gnu/gawk/gawk-${version}.tar.gz";
+    sha256 = "1z4bibjm7ldvjwq3hmyifyb429rs2d9bdwkvs0r171vv1khpdwmb";
   };
+
+  patches = [
+    # for reproducibility don't generate date stamp
+    ./no-stamp.patch
+  ];
 in
 bash.runCommand "${pname}-${version}"
   {
@@ -27,6 +33,7 @@ bash.runCommand "${pname}-${version}"
     nativeBuildInputs = [
       tinycc.compiler
       gnumake
+      gnupatch
       gnused
       gnugrep
     ];
@@ -34,19 +41,24 @@ bash.runCommand "${pname}-${version}"
     passthru.tests.get-version =
       result:
       bash.runCommand "${pname}-get-version-${version}" { } ''
-        ${result}/bin/tar --version
+        ${result}/bin/awk --version
         mkdir $out
       '';
   }
   ''
     # Unpack
-    ungz --file ${src} --output tar.tar
-    untar --file tar.tar
-    rm tar.tar
-    cd tar-${version}
+    ungz --file ${src} --output gawk.tar
+    untar --file gawk.tar
+    rm gawk.tar
+    cd gawk-${version}
+
+    # Patch
+    ${lib.concatMapStringsSep "\n" (f: "patch -Np0 -i ${f}") patches}
 
     # Configure
     export CC="tcc -B ${tinycc.libs}/lib"
+    export ac_cv_func_getpgrp_void=yes
+    export ac_cv_func_tzset=yes
     bash ./configure \
       --build=${buildPlatform.config} \
       --host=${hostPlatform.config} \
@@ -55,8 +67,9 @@ bash.runCommand "${pname}-${version}"
       --prefix=$out
 
     # Build
-    make AR="tcc -ar"
+    make gawk
 
     # Install
-    make install
+    install -D gawk $out/bin/gawk
+    ln -s gawk $out/bin/awk
   ''

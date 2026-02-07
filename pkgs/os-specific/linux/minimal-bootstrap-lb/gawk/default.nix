@@ -6,18 +6,20 @@
   bash,
   tinycc,
   gnumake,
-  gnused,
   gnugrep,
+  gnused,
+  gnutar,
+  gzip,
+  bootGawk,
 }:
 let
   inherit (import ./common.nix { inherit lib; }) meta;
-  pname = "gnutar";
-  # >= 1.13 is incompatible with mes-libc
-  version = "1.12";
+  pname = "gawk";
+  version = "5.3.2";
 
   src = fetchurl {
-    url = "mirror://gnu/tar/tar-${version}.tar.gz";
-    sha256 = "02m6gajm647n8l9a5bnld6fnbgdpyi4i3i83p7xcwv0kif47xhy6";
+    url = "mirror://gnu/gawk/gawk-${version}.tar.gz";
+    hash = "sha256-hjmhqI+0EaG+AmY3OdA+kCptMTtcb+Ak0L/rM0GhmhE=";
   };
 in
 bash.runCommand "${pname}-${version}"
@@ -29,34 +31,36 @@ bash.runCommand "${pname}-${version}"
       gnumake
       gnused
       gnugrep
+      gnutar
+      gzip
+      bootGawk
     ];
 
     passthru.tests.get-version =
       result:
       bash.runCommand "${pname}-get-version-${version}" { } ''
-        ${result}/bin/tar --version
+        ${result}/bin/awk --version
         mkdir $out
       '';
   }
   ''
     # Unpack
-    ungz --file ${src} --output tar.tar
-    untar --file tar.tar
-    rm tar.tar
-    cd tar-${version}
+    tar xzf ${src}
+    cd gawk-${version}
 
     # Configure
     export CC="tcc -B ${tinycc.libs}/lib"
+    export AR="tcc -ar"
+    export LD=tcc
     bash ./configure \
+      --prefix=$out \
       --build=${buildPlatform.config} \
       --host=${hostPlatform.config} \
-      --disable-dependency-tracking \
-      --disable-nls \
-      --prefix=$out
+      --disable-dependency-tracking
 
     # Build
-    make AR="tcc -ar"
+    make -j $NIX_BUILD_CORES
 
     # Install
-    make install
+    make -j $NIX_BUILD_CORES install
   ''

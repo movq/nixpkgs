@@ -7,6 +7,11 @@
   checkMeta,
 }:
 
+let
+  # Early bootstrap runs as i386
+  i386Platform = lib.systems.elaborate "i686-linux";
+in
+
 lib.makeScope
   # Prevent using top-level attrs to protect against introducing dependency on
   # non-bootstrap packages by mistake. Any top-level inputs must be explicitly
@@ -30,6 +35,69 @@ lib.makeScope
   (
     self: with self; {
 
+      i386Bootstrap = lib.makeScope
+        (extra: lib.callPackageWith ({
+          inherit lib config fetchurl checkMeta;
+          buildPlatform = i386Platform;
+          hostPlatform = i386Platform;
+        } // extra))
+        (i386self: with i386self; {
+          stage0-posix = i386self.callPackage ./stage0-posix { };
+
+          inherit (i386self.stage0-posix)
+            kaem
+            m2libc
+            mescc-tools
+            mescc-tools-extra
+            ;
+
+          inherit (i386self.callPackage ./utils.nix { }) derivationWithMeta writeTextFile writeText;
+
+          ln-boot = i386self.callPackage ./ln-boot { };
+
+          mes = i386self.callPackage ./mes { };
+          mes-libc = i386self.callPackage ./mes/libc.nix { };
+
+          # Empty mes/config.h to avoid typedef conflicts
+          mes-config-h-override = kaem.runCommand "mes-config-h-override" { } ''
+            mkdir -p ''${out}/mes
+            catm ''${out}/mes/config.h
+          '';
+
+          tinycc-bootstrappable = lib.recurseIntoAttrs (i386self.callPackage ./tinycc/bootstrappable.nix { });
+          tinycc-mes = lib.recurseIntoAttrs (i386self.callPackage ./tinycc/mes.nix { });
+
+          tinycc-0_9_27 = i386self.callPackage ./tinycc/0.9.27.nix {
+            inherit mes-config-h-override;
+          };
+
+          gnumake-3_82 = i386self.callPackage ./gnumake/3.82.nix { tinycc = tinycc-0_9_27; };
+
+          patch-2_5_9 = i386self.callPackage ./patch/2.5.9.nix {
+            tinycc = tinycc-0_9_27;
+            gnumake = gnumake-3_82;
+          };
+
+          gzip-mes = i386self.callPackage ./gzip {
+            tinycc = tinycc-0_9_27;
+            gnumake = gnumake-3_82;
+            gnupatch = patch-2_5_9;
+          };
+
+          gnutar-mes = i386self.callPackage ./gnutar/mes.nix {
+            tinycc = tinycc-0_9_27;
+            gnumake = gnumake-3_82;
+            gzip = gzip-mes;
+          };
+
+          gnused-mes = i386self.callPackage ./gnused/mes.nix {
+            tinycc = tinycc-0_9_27;
+            gnumake = gnumake-3_82;
+            gnutar = gnutar-mes;
+            gzip = gzip-mes;
+          };
+        });
+
       bash_2_05 = callPackage ./bash/2.nix { tinycc = tinycc-mes; };
 
       bash = callPackage ./bash {
@@ -38,12 +106,14 @@ lib.makeScope
         coreutils = coreutils-musl;
         gnumake = gnumake-musl;
         gnutar = gnutar-musl;
+        gzip = gzip-mes;
       };
 
       bash-static = callPackage ./bash/static.nix {
         gcc = gcc-latest;
         gnumake = gnumake-musl;
         gnutar = gnutar-latest;
+        gzip = gzip-mes;
       };
 
       binutils = callPackage ./binutils {
@@ -74,12 +144,14 @@ lib.makeScope
         tinycc = tinycc-musl;
         gnumake = gnumake-musl;
         gnutar = gnutar-musl;
+        gzip = gzip-mes;
       };
 
       bzip2-static = callPackage ./bzip2/static.nix {
         gcc = gcc-latest;
         gnumake = gnumake-musl;
         gnutar = gnutar-latest;
+        gzip = gzip-mes;
       };
 
       coreutils = callPackage ./coreutils { tinycc = tinycc-mes; };
@@ -89,11 +161,13 @@ lib.makeScope
         tinycc = tinycc-musl;
         gnumake = gnumake-musl;
         gnutar = gnutar-musl;
+        gzip = gzip-mes;
       };
       coreutils-static = callPackage ./coreutils/static.nix {
         gcc = gcc-latest;
         gnumake = gnumake-musl;
         gnutar = gnutar-latest;
+        gzip = gzip-mes;
       };
 
       diffutils = callPackage ./diffutils {
@@ -131,6 +205,7 @@ lib.makeScope
         tinycc = tinycc-musl;
         gnumake = gnumake-musl;
         gnutar = gnutar-musl;
+        gzip = gzip-mes;
         bootGawk = gawk-mes;
       };
 
@@ -138,30 +213,35 @@ lib.makeScope
         tinycc = tinycc-musl;
         gnumake = gnumake-musl;
         gnutar = gnutar-musl;
+        gzip = gzip-mes;
       };
 
       gcc46-cxx = callPackage ./gcc/4.6.cxx.nix {
         gcc = gcc46;
         gnumake = gnumake-musl;
         gnutar = gnutar-musl;
+        gzip = gzip-mes;
       };
 
       gcc10 = callPackage ./gcc/10.nix {
         gcc = gcc46-cxx;
         gnumake = gnumake-musl;
         gnutar = gnutar-latest;
+        gzip = gzip-mes;
       };
 
       gcc-latest = callPackage ./gcc/latest.nix {
         gcc = gcc10;
         gnumake = gnumake-musl;
         gnutar = gnutar-latest;
+        gzip = gzip-mes;
       };
 
       gcc-glibc = callPackage ./gcc/glibc.nix {
         gcc = gcc-latest;
         gnumake = gnumake-musl;
         gnutar = gnutar-latest;
+        gzip = gzip-mes;
       };
 
       glibc = callPackage ./glibc {
@@ -195,12 +275,14 @@ lib.makeScope
         tinycc = tinycc-musl;
         gawk = gawk-mes;
         gnumakeBoot = gnumake;
+        gzip = gzip-mes;
       };
 
       gnumake-static = callPackage ./gnumake/static.nix {
         gcc = gcc-latest;
         gnumake = gnumake-musl;
         gnutar = gnutar-latest;
+        gzip = gzip-mes;
       };
 
       gnupatch = callPackage ./gnupatch { tinycc = tinycc-mes; };
@@ -215,11 +297,7 @@ lib.makeScope
         bash = bash_2_05;
         tinycc = tinycc-musl;
         gnused = gnused-mes;
-      };
-
-      gnused-mes = callPackage ./gnused/mes.nix {
-        bash = bash_2_05;
-        tinycc = tinycc-bootstrappable;
+        gzip = gzip-mes;
       };
 
       gnused-static = callPackage ./gnused/static.nix {
@@ -228,17 +306,12 @@ lib.makeScope
         gnutar = gnutar-latest;
       };
 
-      gnutar = callPackage ./gnutar/mes.nix {
-        bash = bash_2_05;
-        tinycc = tinycc-mes;
-        gnused = gnused-mes;
-      };
-
       # FIXME: better package naming scheme
       gnutar-latest = callPackage ./gnutar/latest.nix {
         gcc = gcc46;
         gnumake = gnumake-musl;
         gnutarBoot = gnutar-musl;
+        gzip = gzip-mes;
       };
 
       gnutar-musl = callPackage ./gnutar/musl.nix {
@@ -251,18 +324,13 @@ lib.makeScope
         gcc = gcc-latest;
         gnumake = gnumake-musl;
         gnutarBoot = gnutar-latest;
+        gzip = gzip-mes;
       };
 
       gzip-static = callPackage ./gzip/static.nix {
         gcc = gcc-latest;
         gnumake = gnumake-musl;
         gnutar = gnutar-latest;
-      };
-
-      gzip = callPackage ./gzip {
-        bash = bash_2_05;
-        tinycc = tinycc-bootstrappable;
-        gnused = gnused-mes;
       };
 
       heirloom = callPackage ./heirloom {
@@ -280,31 +348,31 @@ lib.makeScope
 
       ln-boot = callPackage ./ln-boot { };
 
-      mes = callPackage ./mes { };
-
-      mes-libc = callPackage ./mes/libc.nix { };
-
       musl-tcc-intermediate = callPackage ./musl/tcc.nix {
         bash = bash_2_05;
         tinycc = tinycc-mes;
         gnused = gnused-mes;
+        gzip = gzip-mes;
       };
 
       musl-tcc = callPackage ./musl/tcc.nix {
         bash = bash_2_05;
         tinycc = tinycc-musl-intermediate;
         gnused = gnused-mes;
+        gzip = gzip-mes;
       };
 
       musl = callPackage ./musl {
         gcc = gcc46;
         gnumake = gnumake-musl;
+        gzip = gzip-mes;
       };
 
       patchelf-static = callPackage ./patchelf/static.nix {
         gcc = gcc-latest;
         gnumake = gnumake-musl;
         gnutar = gnutar-latest;
+        gzip = gzip-mes;
       };
 
       python = callPackage ./python {
@@ -313,24 +381,31 @@ lib.makeScope
         gnutar = gnutar-latest;
       };
 
-      stage0-posix = callPackage ./stage0-posix { };
-
-      inherit (self.stage0-posix)
+      # Early bootstrap stages run as i386
+      inherit (i386Bootstrap)
+        stage0-posix
         kaem
         m2libc
         mescc-tools
         mescc-tools-extra
+        mes
+        mes-libc
+        tinycc-bootstrappable
+        tinycc-mes
+        tinycc-0_9_27
+        gnumake-3_82
+        patch-2_5_9
+        gzip-mes
+        gnutar-mes
+        gnused-mes
         ;
-
-      tinycc-bootstrappable = lib.recurseIntoAttrs (callPackage ./tinycc/bootstrappable.nix { });
-
-      tinycc-mes = lib.recurseIntoAttrs (callPackage ./tinycc/mes.nix { });
 
       tinycc-musl-intermediate = lib.recurseIntoAttrs (
         callPackage ./tinycc/musl.nix {
           bash = bash_2_05;
           musl = musl-tcc-intermediate;
           tinycc = tinycc-mes;
+          gzip = gzip-mes;
         }
       );
 
@@ -339,6 +414,7 @@ lib.makeScope
           bash = bash_2_05;
           musl = musl-tcc;
           tinycc = tinycc-musl-intermediate;
+          gzip = gzip-mes;
         }
       );
 
@@ -346,6 +422,7 @@ lib.makeScope
         gcc = gcc-latest;
         gnumake = gnumake-musl;
         gnutar = gnutar-latest;
+        gzip = gzip-mes;
       };
 
       xz = callPackage ./xz {
@@ -353,6 +430,7 @@ lib.makeScope
         tinycc = tinycc-musl;
         gnumake = gnumake-musl;
         gnutar = gnutar-musl;
+        gzip = gzip-mes;
       };
 
       zlib = callPackage ./zlib {
@@ -395,11 +473,11 @@ lib.makeScope
           echo ${gnused.tests.get-version}
           echo ${gnused-mes.tests.get-version}
           echo ${gnused-static.tests.get-version}
-          echo ${gnutar.tests.get-version}
+          echo ${gnutar-mes.tests.get-version}
           echo ${gnutar-latest.tests.get-version}
           echo ${gnutar-musl.tests.get-version}
           echo ${gnutar-static.tests.get-version}
-          echo ${gzip.tests.get-version}
+          echo ${gzip-mes.tests.get-version}
           echo ${gzip-static.tests.get-version}
           echo ${heirloom.tests.get-version}
           echo ${mes.compiler.tests.get-version}

@@ -1,11 +1,11 @@
 {
   lib,
+  buildPlatform,
+  hostPlatform,
   fetchurl,
-  kaem,
+  bash,
   gnumake,
   tinycc,
-  gnutar,
-  gzip,
 }:
 
 let
@@ -18,41 +18,46 @@ let
     url = "mirror://gnu/sed/sed-${version}.tar.gz";
     sha256 = "0006gk1dw2582xsvgx6y6rzs9zw8b36rhafjwm288zqqji3qfrf3";
   };
+
+  # Thanks to the live-bootstrap project!
+  # See https://github.com/fosslinux/live-bootstrap/blob/1bc4296091c51f53a5598050c8956d16e945b0f5/sysa/sed-4.0.9/sed-4.0.9.kaem
+  makefile = fetchurl {
+    url = "https://github.com/fosslinux/live-bootstrap/raw/1bc4296091c51f53a5598050c8956d16e945b0f5/sysa/sed-4.0.9/mk/main.mk";
+    sha256 = "0w1f5ri0g5zla31m6l6xyzbqwdvandqfnzrsw90dd6ak126w3mya";
+  };
 in
-kaem.runCommand "${pname}-${version}"
+bash.runCommand "${pname}-${version}"
   {
     inherit pname version meta;
 
     nativeBuildInputs = [
       gnumake
       tinycc.compiler
-      gnutar
-      gzip
     ];
 
     passthru.tests.get-version =
       result:
-      kaem.runCommand "${pname}-get-version-${version}" { } ''
+      bash.runCommand "${pname}-get-version-${version}" { } ''
         ${result}/bin/sed --version
         mkdir ''${out}
       '';
   }
   ''
     # Unpack
-    cp ${src} sed-${version}.tar.gz
-    ${gzip}/bin/gzip -d -f sed-${version}.tar.gz
-    ${gnutar}/bin/tar xf sed-${version}.tar
-    rm sed-${version}.tar
+    ungz --file ${src} --output sed.tar
+    untar --file sed.tar
+    rm sed.tar
     cd sed-${version}
 
-    cp ${./main.mk} Makefile
+    # Configure
+    cp ${makefile} Makefile
     catm config.h
 
     # Build
-    ${gnumake}/bin/make LIBC=mes CC="${tinycc.compiler}/bin/tcc -B ${tinycc.libs}/lib" AR="${tinycc.compiler}/bin/tcc -ar"
+    make \
+      CC="tcc -B ${tinycc.libs}/lib" \
+      LIBC=mes
 
     # Install
-    mkdir -p ''${out}/bin
-    cp sed/sed ''${out}/bin/sed
-    chmod 555 ''${out}/bin/sed
+    make install PREFIX=$out
   ''

@@ -6,18 +6,19 @@
   bash,
   tinycc,
   gnumake,
-  gnused,
   gnugrep,
+  gnused,
 }:
 let
+  # gnutar with musl preserves modify times, allowing make to not try
+  # rebuilding pregenerated files
   inherit (import ./common.nix { inherit lib; }) meta;
-  pname = "gnutar";
-  # >= 1.13 is incompatible with mes-libc
+  pname = "gnutar-musl";
   version = "1.12";
 
   src = fetchurl {
     url = "mirror://gnu/tar/tar-${version}.tar.gz";
-    sha256 = "02m6gajm647n8l9a5bnld6fnbgdpyi4i3i83p7xcwv0kif47xhy6";
+    hash = "sha256-xsN+iIsTbM76uQPFEUn0t71lnWnUrqISRfYQU6V6pgo=";
   };
 in
 bash.runCommand "${pname}-${version}"
@@ -47,12 +48,16 @@ bash.runCommand "${pname}-${version}"
 
     # Configure
     export CC="tcc -B ${tinycc.libs}/lib"
+    export LD=tcc
+    export ac_cv_sizeof_unsigned_long=4
+    export ac_cv_sizeof_long_long=8
+    export ac_cv_header_netdb_h=no
     bash ./configure \
+      --prefix=$out \
       --build=${buildPlatform.config} \
       --host=${hostPlatform.config} \
       --disable-dependency-tracking \
-      --disable-nls \
-      --prefix=$out
+      --disable-nls
 
     # Build
     make AR="tcc -ar"
