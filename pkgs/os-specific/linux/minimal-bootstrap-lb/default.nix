@@ -113,6 +113,13 @@ lib.makeScope
             gnutar = gnutar-mes;
             bzip2 = bzip2-mes;
           };
+
+          oyacc-mes = i386self.callPackage ./oyacc/mes.nix {
+            tinycc = tinycc-0_9_27-mes;
+            gnumake = gnumake-mes;
+            gnupatch = gnupatch-mes;
+            coreutils = coreutils-mes;
+          };
         });
 
       # Early bootstrap stages run as i386
@@ -134,6 +141,7 @@ lib.makeScope
         gnused-mes
         bzip2-mes
         coreutils-mes
+        oyacc-mes
         ;
 
       inherit (callPackage ./utils.nix { }) derivationWithMeta writeTextFile writeText;
