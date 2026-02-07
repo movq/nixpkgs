@@ -185,6 +185,15 @@ lib.makeScope
             musl = musl-v3;
             gnumake = gnumake-mes;
           };
+
+          bzip2-1_0_8 = i386self.callPackage ./bzip2/musl-v3.nix {
+            bash = bash-mes;
+            tinycc = tinycc-musl-v2;
+            musl = musl-v3;
+            gnumake = gnumake-mes;
+            gnutar = gnutar-mes;
+            gzip = gzip-mes;
+          };
         });
 
       # Early bootstrap stages run as i386
@@ -216,6 +225,7 @@ lib.makeScope
         grep-2_4
         musl-v3
         gnused-4_0_9
+        bzip2-1_0_8
         ;
 
       inherit (callPackage ./utils.nix { }) derivationWithMeta writeTextFile writeText;
