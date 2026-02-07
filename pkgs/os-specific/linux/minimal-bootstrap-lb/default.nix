@@ -133,6 +133,14 @@ lib.makeScope
             tinycc = tinycc-bootstrappable;
             gnupatch = gnupatch-mes;
           });
+
+          musl = i386self.callPackage ./musl/tcc.nix {
+            bash = bash-mes;
+            tinycc = tinycc-for-musl-mes;
+            gnumake = gnumake-mes;
+            gnupatch = gnupatch-mes;
+            gnused = gnused-mes;
+          };
         });
 
       # Early bootstrap stages run as i386
@@ -157,6 +165,7 @@ lib.makeScope
         oyacc-mes
         bash-mes
         tinycc-for-musl-mes
+        musl
         ;
 
       inherit (callPackage ./utils.nix { }) derivationWithMeta writeTextFile writeText;
