@@ -86,8 +86,9 @@ rec {
       #
       # Or, if you prefer, you can create this file using only `git`,
       # `nix`, and `xz`.  For the commands needed in order to do this,
-      # see `make-bootstrap-sources.nix`.  Once you have the manual
-      # result, do:
+      # see the corresponding `make-bootstrap-sources.nix` in
+      # `pkgs/os-specific/linux/minimal-bootstrap/stage0-posix`.
+      # Once you have the manual result, do:
       #
       #   nix-store --add-fixed --recursive ${outputHashAlgo} ./${name}
       #

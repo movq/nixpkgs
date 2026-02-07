@@ -67,48 +67,48 @@ lib.makeScope
           tinycc-bootstrappable = lib.recurseIntoAttrs (i386self.callPackage ./tinycc/bootstrappable.nix { });
           tinycc-mes = lib.recurseIntoAttrs (i386self.callPackage ./tinycc/mes.nix { });
 
-          tinycc-0_9_27 = i386self.callPackage ./tinycc/0.9.27.nix {
+          tinycc-0_9_27-mes = i386self.callPackage ./tinycc/0.9.27.nix {
             inherit mes-config-h-override;
           };
 
-          gnumake-3_82 = i386self.callPackage ./gnumake/3.82.nix { tinycc = tinycc-0_9_27; };
+          gnumake-mes = i386self.callPackage ./gnumake/mes.nix { tinycc = tinycc-0_9_27-mes; };
 
-          patch-2_5_9 = i386self.callPackage ./patch/2.5.9.nix {
-            tinycc = tinycc-0_9_27;
-            gnumake = gnumake-3_82;
+          gnupatch-mes = i386self.callPackage ./gnupatch/mes.nix {
+            tinycc = tinycc-0_9_27-mes;
+            gnumake = gnumake-mes;
           };
 
-          gzip-mes = i386self.callPackage ./gzip {
-            tinycc = tinycc-0_9_27;
-            gnumake = gnumake-3_82;
-            gnupatch = patch-2_5_9;
+          gzip-mes = i386self.callPackage ./gzip/mes.nix {
+            tinycc = tinycc-0_9_27-mes;
+            gnumake = gnumake-mes;
+            gnupatch = gnupatch-mes;
           };
 
           gnutar-mes = i386self.callPackage ./gnutar/mes.nix {
-            tinycc = tinycc-0_9_27;
-            gnumake = gnumake-3_82;
+            tinycc = tinycc-0_9_27-mes;
+            gnumake = gnumake-mes;
             gzip = gzip-mes;
           };
 
           gnused-mes = i386self.callPackage ./gnused/mes.nix {
-            tinycc = tinycc-0_9_27;
-            gnumake = gnumake-3_82;
+            tinycc = tinycc-0_9_27-mes;
+            gnumake = gnumake-mes;
             gnutar = gnutar-mes;
             gzip = gzip-mes;
           };
 
           bzip2-mes = i386self.callPackage ./bzip2/mes.nix {
-            tinycc = tinycc-0_9_27;
-            gnumake = gnumake-3_82;
-            gnupatch = patch-2_5_9;
+            tinycc = tinycc-0_9_27-mes;
+            gnumake = gnumake-mes;
+            gnupatch = gnupatch-mes;
             gnutar = gnutar-mes;
             gzip = gzip-mes;
           };
 
-          coreutils-5_0 = i386self.callPackage ./coreutils {
-            tinycc = tinycc-0_9_27;
-            gnumake = gnumake-3_82;
-            gnupatch = patch-2_5_9;
+          coreutils-mes = i386self.callPackage ./coreutils/mes.nix {
+            tinycc = tinycc-0_9_27-mes;
+            gnumake = gnumake-mes;
+            gnupatch = gnupatch-mes;
             gnused = gnused-mes;
             gnutar = gnutar-mes;
             bzip2 = bzip2-mes;
@@ -126,14 +126,14 @@ lib.makeScope
         mes-libc
         tinycc-bootstrappable
         tinycc-mes
-        tinycc-0_9_27
-        gnumake-3_82
-        patch-2_5_9
+        tinycc-0_9_27-mes
+        gnumake-mes
+        gnupatch-mes
         gzip-mes
         gnutar-mes
         gnused-mes
         bzip2-mes
-        coreutils-5_0
+        coreutils-mes
         ;
 
       inherit (callPackage ./utils.nix { }) derivationWithMeta writeTextFile writeText;
