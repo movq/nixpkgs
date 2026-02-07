@@ -78,22 +78,23 @@ lib.makeScope
             gnumake = gnumake-3_82;
           };
 
-          gzip = i386self.callPackage ./gzip {
+          gzip-mes = i386self.callPackage ./gzip {
             tinycc = tinycc-0_9_27;
             gnumake = gnumake-3_82;
             gnupatch = patch-2_5_9;
           };
 
-          gnutar = i386self.callPackage ./gnutar/mes.nix {
+          gnutar-mes = i386self.callPackage ./gnutar/mes.nix {
             tinycc = tinycc-0_9_27;
             gnumake = gnumake-3_82;
-            inherit gzip;
+            gzip = gzip-mes;
           };
 
           gnused-mes = i386self.callPackage ./gnused/mes.nix {
             tinycc = tinycc-0_9_27;
             gnumake = gnumake-3_82;
-            inherit gnutar gzip;
+            gnutar = gnutar-mes;
+            gzip = gzip-mes;
           };
         });
 
@@ -105,12 +106,14 @@ lib.makeScope
         coreutils = coreutils-musl;
         gnumake = gnumake-musl;
         gnutar = gnutar-musl;
+        gzip = gzip-mes;
       };
 
       bash-static = callPackage ./bash/static.nix {
         gcc = gcc-latest;
         gnumake = gnumake-musl;
         gnutar = gnutar-latest;
+        gzip = gzip-mes;
       };
 
       binutils = callPackage ./binutils {
@@ -141,12 +144,14 @@ lib.makeScope
         tinycc = tinycc-musl;
         gnumake = gnumake-musl;
         gnutar = gnutar-musl;
+        gzip = gzip-mes;
       };
 
       bzip2-static = callPackage ./bzip2/static.nix {
         gcc = gcc-latest;
         gnumake = gnumake-musl;
         gnutar = gnutar-latest;
+        gzip = gzip-mes;
       };
 
       coreutils = callPackage ./coreutils { tinycc = tinycc-mes; };
@@ -156,11 +161,13 @@ lib.makeScope
         tinycc = tinycc-musl;
         gnumake = gnumake-musl;
         gnutar = gnutar-musl;
+        gzip = gzip-mes;
       };
       coreutils-static = callPackage ./coreutils/static.nix {
         gcc = gcc-latest;
         gnumake = gnumake-musl;
         gnutar = gnutar-latest;
+        gzip = gzip-mes;
       };
 
       diffutils = callPackage ./diffutils {
@@ -198,6 +205,7 @@ lib.makeScope
         tinycc = tinycc-musl;
         gnumake = gnumake-musl;
         gnutar = gnutar-musl;
+        gzip = gzip-mes;
         bootGawk = gawk-mes;
       };
 
@@ -205,30 +213,35 @@ lib.makeScope
         tinycc = tinycc-musl;
         gnumake = gnumake-musl;
         gnutar = gnutar-musl;
+        gzip = gzip-mes;
       };
 
       gcc46-cxx = callPackage ./gcc/4.6.cxx.nix {
         gcc = gcc46;
         gnumake = gnumake-musl;
         gnutar = gnutar-musl;
+        gzip = gzip-mes;
       };
 
       gcc10 = callPackage ./gcc/10.nix {
         gcc = gcc46-cxx;
         gnumake = gnumake-musl;
         gnutar = gnutar-latest;
+        gzip = gzip-mes;
       };
 
       gcc-latest = callPackage ./gcc/latest.nix {
         gcc = gcc10;
         gnumake = gnumake-musl;
         gnutar = gnutar-latest;
+        gzip = gzip-mes;
       };
 
       gcc-glibc = callPackage ./gcc/glibc.nix {
         gcc = gcc-latest;
         gnumake = gnumake-musl;
         gnutar = gnutar-latest;
+        gzip = gzip-mes;
       };
 
       glibc = callPackage ./glibc {
@@ -262,12 +275,14 @@ lib.makeScope
         tinycc = tinycc-musl;
         gawk = gawk-mes;
         gnumakeBoot = gnumake;
+        gzip = gzip-mes;
       };
 
       gnumake-static = callPackage ./gnumake/static.nix {
         gcc = gcc-latest;
         gnumake = gnumake-musl;
         gnutar = gnutar-latest;
+        gzip = gzip-mes;
       };
 
       gnupatch = callPackage ./gnupatch { tinycc = tinycc-mes; };
@@ -282,6 +297,7 @@ lib.makeScope
         bash = bash_2_05;
         tinycc = tinycc-musl;
         gnused = gnused-mes;
+        gzip = gzip-mes;
       };
 
       gnused-static = callPackage ./gnused/static.nix {
@@ -295,6 +311,7 @@ lib.makeScope
         gcc = gcc46;
         gnumake = gnumake-musl;
         gnutarBoot = gnutar-musl;
+        gzip = gzip-mes;
       };
 
       gnutar-musl = callPackage ./gnutar/musl.nix {
@@ -307,6 +324,7 @@ lib.makeScope
         gcc = gcc-latest;
         gnumake = gnumake-musl;
         gnutarBoot = gnutar-latest;
+        gzip = gzip-mes;
       };
 
       gzip-static = callPackage ./gzip/static.nix {
@@ -334,23 +352,27 @@ lib.makeScope
         bash = bash_2_05;
         tinycc = tinycc-mes;
         gnused = gnused-mes;
+        gzip = gzip-mes;
       };
 
       musl-tcc = callPackage ./musl/tcc.nix {
         bash = bash_2_05;
         tinycc = tinycc-musl-intermediate;
         gnused = gnused-mes;
+        gzip = gzip-mes;
       };
 
       musl = callPackage ./musl {
         gcc = gcc46;
         gnumake = gnumake-musl;
+        gzip = gzip-mes;
       };
 
       patchelf-static = callPackage ./patchelf/static.nix {
         gcc = gcc-latest;
         gnumake = gnumake-musl;
         gnutar = gnutar-latest;
+        gzip = gzip-mes;
       };
 
       python = callPackage ./python {
@@ -373,8 +395,8 @@ lib.makeScope
         tinycc-0_9_27
         gnumake-3_82
         patch-2_5_9
-        gzip
-        gnutar
+        gzip-mes
+        gnutar-mes
         gnused-mes
         ;
 
@@ -383,6 +405,7 @@ lib.makeScope
           bash = bash_2_05;
           musl = musl-tcc-intermediate;
           tinycc = tinycc-mes;
+          gzip = gzip-mes;
         }
       );
 
@@ -391,6 +414,7 @@ lib.makeScope
           bash = bash_2_05;
           musl = musl-tcc;
           tinycc = tinycc-musl-intermediate;
+          gzip = gzip-mes;
         }
       );
 
@@ -398,6 +422,7 @@ lib.makeScope
         gcc = gcc-latest;
         gnumake = gnumake-musl;
         gnutar = gnutar-latest;
+        gzip = gzip-mes;
       };
 
       xz = callPackage ./xz {
@@ -405,6 +430,7 @@ lib.makeScope
         tinycc = tinycc-musl;
         gnumake = gnumake-musl;
         gnutar = gnutar-musl;
+        gzip = gzip-mes;
       };
 
       zlib = callPackage ./zlib {
@@ -447,11 +473,11 @@ lib.makeScope
           echo ${gnused.tests.get-version}
           echo ${gnused-mes.tests.get-version}
           echo ${gnused-static.tests.get-version}
-          echo ${gnutar.tests.get-version}
+          echo ${gnutar-mes.tests.get-version}
           echo ${gnutar-latest.tests.get-version}
           echo ${gnutar-musl.tests.get-version}
           echo ${gnutar-static.tests.get-version}
-          echo ${gzip.tests.get-version}
+          echo ${gzip-mes.tests.get-version}
           echo ${gzip-static.tests.get-version}
           echo ${heirloom.tests.get-version}
           echo ${mes.compiler.tests.get-version}
