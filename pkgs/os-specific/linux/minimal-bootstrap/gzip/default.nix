@@ -1,11 +1,10 @@
 {
   lib,
   fetchurl,
-  bash,
+  kaem,
   tinycc,
   gnumake,
-  gnused,
-  gnugrep,
+  gnupatch,
 }:
 let
   pname = "gzip";
@@ -16,22 +15,21 @@ let
     sha256 = "0ryr5b00qz3xcdcv03qwjdfji8pasp0007ay3ppmk71wl8c1i90w";
   };
 in
-bash.runCommand "${pname}-${version}"
+kaem.runCommand "${pname}-${version}"
   {
     inherit pname version;
 
     nativeBuildInputs = [
       tinycc.compiler
       gnumake
-      gnused
-      gnugrep
+      gnupatch
     ];
 
     passthru.tests.get-version =
       result:
-      bash.runCommand "${pname}-get-version-${version}" { } ''
+      kaem.runCommand "${pname}-get-version-${version}" { } ''
         ${result}/bin/gzip --version
-        mkdir $out
+        mkdir ''${out}
       '';
 
     meta = {
@@ -49,15 +47,26 @@ bash.runCommand "${pname}-${version}"
     rm gzip.tar
     cd gzip-${version}
 
-    # Configure
-    export CC="tcc -B ${tinycc.libs}/lib -Dstrlwr=unused"
-    bash ./configure --prefix=$out \
-      --disable-dependency-tracking
+    cp ${./main.mk} Makefile
+    catm gzip.c.new ${./stat_override.c} gzip.c
+    cp gzip.c.new gzip.c
+
+    # Regen CRC table
+    ${gnupatch}/bin/patch -Np1 -i ${./removecrc.patch}
+    ${gnupatch}/bin/patch -Np1 -i ${./makecrc-write-to-file.patch}
+
+    ${tinycc.compiler}/bin/tcc -B ${tinycc.libs}/lib -static -o makecrc sample/makecrc.c
+    ./makecrc
+    catm util.c.new util.c crc.c
+    cp util.c.new util.c
 
     # Build
-    make
+    ${gnumake}/bin/make CC="${tinycc.compiler}/bin/tcc -B ${tinycc.libs}/lib" AR="${tinycc.compiler}/bin/tcc -B ${tinycc.libs}/lib -ar"
 
     # Install
-    mkdir $out
-    make install
+    mkdir -p ''${out}/bin
+    cp gzip ''${out}/bin/gzip
+    cp gzip ''${out}/bin/gunzip
+    chmod 555 ''${out}/bin/gzip
+    chmod 555 ''${out}/bin/gunzip
   ''

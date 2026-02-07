@@ -77,6 +77,12 @@ lib.makeScope
             tinycc = tinycc-0_9_27;
             gnumake = gnumake-3_82;
           };
+
+          gzip = i386self.callPackage ./gzip {
+            tinycc = tinycc-0_9_27;
+            gnumake = gnumake-3_82;
+            gnupatch = patch-2_5_9;
+          };
         });
 
       bash_2_05 = callPackage ./bash/2.nix { tinycc = tinycc-mes; };
@@ -308,12 +314,6 @@ lib.makeScope
         gnutar = gnutar-latest;
       };
 
-      gzip = callPackage ./gzip {
-        bash = bash_2_05;
-        tinycc = tinycc-bootstrappable;
-        gnused = gnused-mes;
-      };
-
       heirloom = callPackage ./heirloom {
         bash = bash_2_05;
         tinycc = tinycc-mes;
@@ -372,6 +372,7 @@ lib.makeScope
         tinycc-0_9_27
         gnumake-3_82
         patch-2_5_9
+        gzip
         ;
 
       tinycc-musl-intermediate = lib.recurseIntoAttrs (
