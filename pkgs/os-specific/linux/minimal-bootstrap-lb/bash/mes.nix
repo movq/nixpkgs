@@ -2,10 +2,13 @@
   lib,
   fetchurl,
   kaem,
+  derivationWithMeta,
+  writeText,
   tinycc,
   gnumake,
   gnupatch,
   coreutils,
+  mescc-tools-extra,
   oyacc,
 }:
 let
@@ -25,8 +28,7 @@ let
     ./locale.patch
     ./dev-tty.patch
   ];
-in
-kaem.runCommand "${pname}-${version}"
+  bashMes = kaem.runCommand "${pname}-${version}"
   {
     inherit pname version meta;
 
@@ -44,6 +46,41 @@ kaem.runCommand "${pname}-${version}"
         ${result}/bin/bash --version
         mkdir ''${out}
       '';
+
+    passthru.runCommand =
+      name: env: buildCommand:
+      derivationWithMeta (
+        {
+          inherit name buildCommand;
+          builder = "${bashMes}/bin/bash";
+          args = [
+            "-e"
+            (writeText "bash-builder.sh" ''
+              export CONFIG_SHELL=$SHELL
+
+              NIX_BUILD_CORES="''${NIX_BUILD_CORES:-1}"
+              if [ "$NIX_BUILD_CORES" -le 0 ]; then
+                NIX_BUILD_CORES=1
+              fi
+              export NIX_BUILD_CORES
+
+              bash -eux "$buildCommandPath"
+            '')
+          ];
+          passAsFile = [ "buildCommand" ];
+
+          SHELL = "${bashMes}/bin/bash";
+          PATH = lib.makeBinPath (
+            (env.nativeBuildInputs or [ ])
+            ++ [
+              bashMes
+              coreutils
+              mescc-tools-extra
+            ]
+          );
+        }
+        // (removeAttrs env [ "nativeBuildInputs" ])
+      );
   }
   ''
     # Unpack
@@ -82,3 +119,6 @@ kaem.runCommand "${pname}-${version}"
     ${coreutils}/bin/install -m 555 bash ''${out}/bin/bash
     ${coreutils}/bin/install -m 555 bash ''${out}/bin/sh
   ''
+  ;
+in
+bashMes
