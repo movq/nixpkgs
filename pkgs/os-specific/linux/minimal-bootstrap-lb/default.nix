@@ -194,6 +194,15 @@ lib.makeScope
             gnutar = gnutar-mes;
             gzip = gzip-mes;
           };
+
+          m4-1_4_7 = i386self.callPackage ./m4/1.4.7.nix {
+            bash = bash-mes;
+            tinycc = tinycc-musl-v2;
+            musl = musl-v3;
+            gnumake = gnumake-mes;
+            gnutar = gnutar-mes;
+            bzip2 = bzip2-1_0_8;
+          };
         });
 
       # Early bootstrap stages run as i386
@@ -226,6 +235,7 @@ lib.makeScope
         musl-v3
         gnused-4_0_9
         bzip2-1_0_8
+        m4-1_4_7
         ;
 
       inherit (callPackage ./utils.nix { }) derivationWithMeta writeTextFile writeText;
