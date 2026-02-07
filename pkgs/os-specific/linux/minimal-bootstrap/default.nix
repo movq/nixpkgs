@@ -76,6 +76,11 @@ lib.makeScope
           };
 
           gnumake-3_82 = i386self.callPackage ./gnumake/3.82.nix { tinycc = tinycc-0_9_27; };
+
+          patch-2_5_9 = i386self.callPackage ./patch/2.5.9.nix {
+            tinycc = tinycc-0_9_27;
+            gnumake = gnumake-3_82;
+          };
         });
 
       bash_2_05 = callPackage ./bash/2.nix { tinycc = tinycc-mes; };
@@ -387,6 +392,10 @@ lib.makeScope
       gnumake-3_82 = if useI386Bootstrap
         then i386Bootstrap.gnumake-3_82
         else callPackage ./gnumake/3.82.nix { tinycc = tinycc-0_9_27; };
+
+      patch-2_5_9 = if useI386Bootstrap
+        then i386Bootstrap.patch-2_5_9
+        else callPackage ./patch/2.5.9.nix { tinycc = tinycc-0_9_27; gnumake = gnumake-3_82; };
 
       mes = if useI386Bootstrap then i386Bootstrap.mes else callPackage ./mes { };
       mes-libc = if useI386Bootstrap then i386Bootstrap.mes-libc else callPackage ./mes/libc.nix { };
