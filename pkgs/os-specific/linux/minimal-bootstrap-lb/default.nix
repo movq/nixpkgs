@@ -120,6 +120,14 @@ lib.makeScope
             gnupatch = gnupatch-mes;
             coreutils = coreutils-mes;
           };
+
+          bash-mes = i386self.callPackage ./bash/mes.nix {
+            tinycc = tinycc-0_9_27-mes;
+            gnumake = gnumake-mes;
+            gnupatch = gnupatch-mes;
+            coreutils = coreutils-mes;
+            oyacc = oyacc-mes;
+          };
         });
 
       # Early bootstrap stages run as i386
@@ -142,6 +150,7 @@ lib.makeScope
         bzip2-mes
         coreutils-mes
         oyacc-mes
+        bash-mes
         ;
 
       inherit (callPackage ./utils.nix { }) derivationWithMeta writeTextFile writeText;
