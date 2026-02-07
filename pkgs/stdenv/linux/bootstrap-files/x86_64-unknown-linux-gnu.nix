@@ -10,12 +10,12 @@
 # - build time: Sat, 10 Feb 2024 01:29:55 +0000
 {
   bootstrapTools = import <nix/fetchurl.nix> {
-    url = "http://tarballs.nixos.org/stdenv/x86_64-unknown-linux-gnu/82b583ba2ba2e5706b35dbe23f31362e62be2a9d/bootstrap-tools.tar.xz";
-    hash = "sha256-YQlr088HPoVWBU2jpPhpIMyOyoEDZYDw1y60SGGbUM0=";
+    url = "https://git.mjones.io/mike/bootstrap-scripts/releases/download/0.1.0/bootstrap-tools.tar.xz";
+    hash = "sha256-lIj991pq5DHW45B1yAZ2BE34yx1HYrW0Cno+G3eyalM=";
   };
   busybox = import <nix/fetchurl.nix> {
-    url = "http://tarballs.nixos.org/stdenv/x86_64-unknown-linux-gnu/82b583ba2ba2e5706b35dbe23f31362e62be2a9d/busybox";
-    hash = "sha256-QrTEnQTBM1Y/qV9odq8irZkQSD9uOMbs2Q5NgCvKCNQ=";
+    url = "https://git.mjones.io/mike/bootstrap-scripts/releases/download/0.1.0/busybox";
+    hash = "sha256-5RJvO8XtNML4rGRX/TW4LUbp46PoDcYCRXreWJK5eeg=";
     executable = true;
   };
 }

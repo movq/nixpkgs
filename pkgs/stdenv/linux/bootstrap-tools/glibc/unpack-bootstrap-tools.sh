@@ -39,6 +39,7 @@ LD_LIBRARY_PATH=.:$out/lib:$LIBSTDCXX_SO_DIR $LD_BINARY \
 
 for i in $out/bin/* $out/libexec/gcc/*/*/*; do
     if [ -L "$i" ]; then continue; fi
+    if [ -d "$i" ]; then continue; fi
     if [ -z "${i##*/liblto*}" ]; then continue; fi
     echo patching "$i"
     LD_LIBRARY_PATH=$out/lib:$LIBSTDCXX_SO_DIR $LD_BINARY \
