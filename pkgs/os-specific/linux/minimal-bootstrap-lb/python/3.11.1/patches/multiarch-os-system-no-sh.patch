@@ -1,0 +1,42 @@
+--- a/setup.py
++++ b/setup.py
+@@ -125,6 +125,8 @@ CLASSIFIERS = """
+ 
+ def run_command(cmd):
+     status = os.system(cmd)
++    if status < 0:
++        return status
+     return os.waitstatus_to_exitcode(status)
+ 
+ 
+@@ -697,7 +699,8 @@ class PyBuildExt(build_ext):
+                 with open(tmpfile) as fp:
+                     multiarch_path_component = fp.readline().strip()
+         finally:
+-            os.unlink(tmpfile)
++            if os.path.exists(tmpfile):
++                os.unlink(tmpfile)
+ 
+         if multiarch_path_component != '':
+             add_dir_to_list(self.compiler.library_dirs,
+@@ -726,7 +729,8 @@ class PyBuildExt(build_ext):
+                 add_dir_to_list(self.compiler.include_dirs,
+                                 '/usr/include/' + multiarch_path_component)
+         finally:
+-            os.unlink(tmpfile)
++            if os.path.exists(tmpfile):
++                os.unlink(tmpfile)
+ 
+     def add_wrcc_search_dirs(self):
+         # add library search path by wr-cc, the compiler wrapper
+@@ -806,7 +810,8 @@ class PyBuildExt(build_ext):
+                         elif (is_gcc or is_clang) and in_incdirs and '/gcc/' not in line and '/clang/' not in line:
+                             add_dir_to_list(self.compiler.include_dirs,
+                                             line.strip())
+-        finally:
+-            os.unlink(tmpfile)
++        finally:
++            if os.path.exists(tmpfile):
++                os.unlink(tmpfile)
+ 
+         if VXWORKS:

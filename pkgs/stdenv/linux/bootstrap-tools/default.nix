@@ -25,7 +25,9 @@ let
     extraAttrs = maybeContentAddressed;
   };
   result =
-    if libc == "glibc" then
+    if bootstrapFiles.bootstrapTools.isAssembled or false then
+      bootstrapFiles.bootstrapTools
+    else if libc == "glibc" then
       import ./glibc.nix args
     else if libc == "musl" then
       import ./musl.nix args

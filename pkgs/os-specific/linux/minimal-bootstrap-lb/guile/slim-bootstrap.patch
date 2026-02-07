@@ -1,0 +1,178 @@
+--- a/am/bootstrap.am	2026-02-27 13:03:06.963006124 +0000
++++ b/am/bootstrap.am	2026-02-27 13:03:05.771005932 +0000
+@@ -196,66 +196,17 @@
+   ice-9/vlist.scm				\
+   ice-9/weak-vector.scm				\
+ 						\
+-  language/brainfuck/parse.scm			\
+-  language/brainfuck/compile-scheme.scm		\
+-  language/brainfuck/compile-tree-il.scm	\
+-  language/brainfuck/spec.scm			\
+-						\
+   language/bytecode.scm				\
+   language/bytecode/spec.scm			\
+ 						\
+-  language/ecmascript/tokenize.scm		\
+-  language/ecmascript/parse.scm			\
+-  language/ecmascript/impl.scm			\
+-  language/ecmascript/base.scm			\
+-  language/ecmascript/function.scm		\
+-  language/ecmascript/array.scm			\
+-  language/ecmascript/compile-tree-il.scm	\
+-  language/ecmascript/spec.scm			\
+-						\
+-  language/elisp/falias.scm			\
+-  language/elisp/lexer.scm			\
+-  language/elisp/parser.scm			\
+-  language/elisp/bindings.scm			\
+-  language/elisp/compile-tree-il.scm		\
+-  language/elisp/runtime.scm			\
+-  language/elisp/runtime/function-slot.scm	\
+-  language/elisp/runtime/value-slot.scm		\
+-  language/elisp/spec.scm			\
+-						\
+   language/scheme/compile-tree-il.scm		\
+   language/scheme/decompile-tree-il.scm		\
+   language/scheme/spec.scm			\
+ 						\
+   language/value/spec.scm			\
+ 						\
+-  rnrs/base.scm					\
+-  rnrs/conditions.scm				\
+-  rnrs/control.scm				\
+-  rnrs/enums.scm				\
+-  rnrs/eval.scm					\
+-  rnrs/exceptions.scm				\
+-  rnrs/files.scm				\
+-  rnrs/hashtables.scm				\
+-  rnrs/lists.scm				\
+-  rnrs/mutable-pairs.scm			\
+-  rnrs/mutable-strings.scm			\
+-  rnrs/programs.scm				\
+-  rnrs/r5rs.scm					\
+-  rnrs/sorting.scm				\
+-  rnrs/syntax-case.scm				\
+-  rnrs/unicode.scm				\
+-  rnrs/arithmetic/bitwise.scm			\
+-  rnrs/arithmetic/fixnums.scm			\
+-  rnrs/arithmetic/flonums.scm			\
+   rnrs/bytevectors.scm				\
+   rnrs/bytevectors/gnu.scm			\
+-  rnrs/io/simple.scm				\
+-  rnrs/io/ports.scm				\
+-  rnrs/records/inspection.scm			\
+-  rnrs/records/procedural.scm			\
+-  rnrs/records/syntactic.scm			\
+-  rnrs.scm					\
+ 						\
+   oop/goops.scm					\
+   oop/goops/active-slot.scm			\
+@@ -267,44 +218,6 @@
+   oop/goops/accessors.scm			\
+   oop/goops/simple.scm				\
+ 						\
+-  scheme/base.scm				\
+-  scheme/case-lambda.scm			\
+-  scheme/char.scm				\
+-  scheme/complex.scm				\
+-  scheme/cxr.scm				\
+-  scheme/eval.scm				\
+-  scheme/file.scm				\
+-  scheme/inexact.scm				\
+-  scheme/lazy.scm				\
+-  scheme/load.scm				\
+-  scheme/process-context.scm			\
+-  scheme/r5rs.scm				\
+-  scheme/read.scm				\
+-  scheme/repl.scm				\
+-  scheme/time.scm				\
+-  scheme/write.scm				\
+-						\
+-  scripts/compile.scm				\
+-  scripts/disassemble.scm			\
+-  scripts/display-commentary.scm		\
+-  scripts/doc-snarf.scm				\
+-  scripts/frisk.scm				\
+-  scripts/generate-autoload.scm			\
+-  scripts/help.scm				\
+-  scripts/lint.scm				\
+-  scripts/list.scm				\
+-  scripts/punify.scm				\
+-  scripts/read-scheme-source.scm		\
+-  scripts/read-text-outline.scm			\
+-  scripts/use2dot.scm				\
+-  scripts/snarf-check-and-output-texi.scm	\
+-  scripts/summarize-guile-TODO.scm		\
+-  scripts/api-diff.scm				\
+-  scripts/read-rfc822.scm			\
+-  scripts/snarf-guile-m4-docs.scm		\
+-  scripts/autofrisk.scm				\
+-  scripts/scan-api.scm				\
+-						\
+   srfi/srfi-1.scm				\
+   srfi/srfi-2.scm				\
+   srfi/srfi-4.scm				\
+@@ -346,8 +259,6 @@
+   srfi/srfi-171/gnu.scm                         \
+   srfi/srfi-171/meta.scm                        \
+ 						\
+-  statprof.scm					\
+-						\
+   system/base/pmatch.scm			\
+   system/base/syntax.scm			\
+   system/base/compile.scm			\
+@@ -388,38 +299,11 @@
+   system/vm/traps.scm				\
+   system/vm/vm.scm				\
+ 						\
+-  system/syntax.scm				\
+-						\
+-  system/xref.scm				\
+-						\
+-  sxml/apply-templates.scm			\
+-  sxml/fold.scm					\
+-  sxml/match.scm				\
+-  sxml/simple.scm				\
+-  sxml/ssax/input-parse.scm			\
+-  sxml/ssax.scm					\
+-  sxml/transform.scm				\
+-  sxml/xpath.scm				\
+-						\
+-  texinfo.scm					\
+-  texinfo/docbook.scm				\
+-  texinfo/html.scm				\
+-  texinfo/indexing.scm				\
+-  texinfo/string-utils.scm			\
+-  texinfo/plain-text.scm			\
+-  texinfo/reflection.scm			\
+-  texinfo/serialize.scm				\
+-						\
+-  web/client.scm				\
+-  web/http.scm					\
+-  web/request.scm				\
+-  web/response.scm				\
+-  web/server.scm				\
+-  web/server/http.scm				\
+-  web/uri.scm
++  system/syntax.scm                             \
++                                                \
++  system/xref.scm
+ 
+-ELISP_SOURCES =					\
+-  language/elisp/boot.el
++ELISP_SOURCES =
+ 
+ NOCOMP_SOURCES =				\
+   ice-9/match.upstream.scm			\
+@@ -432,10 +316,4 @@
+   srfi/srfi-64/testing.scm			\
+   srfi/srfi-67/compare.scm			\
+   system/base/lalr.upstream.scm			\
+-  system/repl/describe.scm			\
+-  sxml/sxml-match.ss				\
+-  sxml/upstream/SSAX.scm			\
+-  sxml/upstream/SXML-tree-trans.scm		\
+-  sxml/upstream/SXPath-old.scm			\
+-  sxml/upstream/assert.scm			\
+-  sxml/upstream/input-parse.scm
++  system/repl/describe.scm
