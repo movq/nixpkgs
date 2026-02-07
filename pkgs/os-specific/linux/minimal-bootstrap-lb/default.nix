@@ -96,6 +96,14 @@ lib.makeScope
             gnutar = gnutar-mes;
             gzip = gzip-mes;
           };
+
+          bzip2-mes = i386self.callPackage ./bzip2/mes.nix {
+            tinycc = tinycc-0_9_27;
+            gnumake = gnumake-3_82;
+            gnupatch = patch-2_5_9;
+            gnutar = gnutar-mes;
+            gzip = gzip-mes;
+          };
         });
 
       bash_2_05 = callPackage ./bash/2.nix { tinycc = tinycc-mes; };
@@ -398,6 +406,7 @@ lib.makeScope
         gzip-mes
         gnutar-mes
         gnused-mes
+        bzip2-mes
         ;
 
       tinycc-musl-intermediate = lib.recurseIntoAttrs (
@@ -449,6 +458,7 @@ lib.makeScope
           echo ${binutils-static.tests.get-version}
           echo ${bison.tests.get-version}
           echo ${busybox-static.tests.get-version}
+          echo ${bzip2-mes.tests.get-version}
           echo ${bzip2.tests.get-version}
           echo ${bzip2-static.tests.get-version}
           echo ${coreutils-musl.tests.get-version}
