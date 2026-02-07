@@ -128,6 +128,11 @@ lib.makeScope
             coreutils = coreutils-mes;
             oyacc = oyacc-mes;
           };
+
+          tinycc-for-musl-mes = lib.recurseIntoAttrs (i386self.callPackage ./tinycc/for-musl.nix {
+            tinycc = tinycc-bootstrappable;
+            gnupatch = gnupatch-mes;
+          });
         });
 
       # Early bootstrap stages run as i386
@@ -151,6 +156,7 @@ lib.makeScope
         coreutils-mes
         oyacc-mes
         bash-mes
+        tinycc-for-musl-mes
         ;
 
       inherit (callPackage ./utils.nix { }) derivationWithMeta writeTextFile writeText;
