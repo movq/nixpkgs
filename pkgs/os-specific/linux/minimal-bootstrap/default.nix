@@ -8,11 +8,8 @@
 }:
 
 let
-  # Force i386 for early bootstrap stages even on x86_64
+  # Early bootstrap runs as i386
   i386Platform = lib.systems.elaborate "i686-linux";
-  useI386Bootstrap = hostPlatform.system == "x86_64-linux";
-
-  earlyBootstrapPlatform = if useI386Bootstrap then i386Platform else hostPlatform;
 in
 
 lib.makeScope
@@ -31,7 +28,6 @@ lib.makeScope
           fetchurl
           checkMeta
           ;
-        inherit earlyBootstrapPlatform useI386Bootstrap;
       }
       // extra
     )
@@ -362,43 +358,21 @@ lib.makeScope
         gnutar = gnutar-latest;
       };
 
-      # On x86_64, use i386 bootstrap for early stages (matches live-bootstrap)
-      # On other platforms, use native bootstrap
-      stage0-posix = if useI386Bootstrap then i386Bootstrap.stage0-posix else callPackage ./stage0-posix { };
-
-      inherit (self.stage0-posix)
+      # Early bootstrap stages run as i386
+      inherit (i386Bootstrap)
+        stage0-posix
         kaem
         m2libc
         mescc-tools
         mescc-tools-extra
+        mes
+        mes-libc
+        tinycc-bootstrappable
+        tinycc-mes
+        tinycc-0_9_27
+        gnumake-3_82
+        patch-2_5_9
         ;
-
-      # Early bootstrap uses i386 on x86_64
-      tinycc-bootstrappable = if useI386Bootstrap
-        then i386Bootstrap.tinycc-bootstrappable
-        else lib.recurseIntoAttrs (callPackage ./tinycc/bootstrappable.nix { });
-
-      tinycc-mes = if useI386Bootstrap
-        then i386Bootstrap.tinycc-mes
-        else lib.recurseIntoAttrs (callPackage ./tinycc/mes.nix { });
-
-      # TinyCC 0.9.27 matching live-bootstrap exactly
-      # Uses only mes-libc headers (no tcc headers in sysincludepaths)
-      # This avoids alloca declaration conflicts with older software
-      tinycc-0_9_27 = if useI386Bootstrap
-        then i386Bootstrap.tinycc-0_9_27
-        else callPackage ./tinycc/0.9.27.nix { };
-
-      gnumake-3_82 = if useI386Bootstrap
-        then i386Bootstrap.gnumake-3_82
-        else callPackage ./gnumake/3.82.nix { tinycc = tinycc-0_9_27; };
-
-      patch-2_5_9 = if useI386Bootstrap
-        then i386Bootstrap.patch-2_5_9
-        else callPackage ./patch/2.5.9.nix { tinycc = tinycc-0_9_27; gnumake = gnumake-3_82; };
-
-      mes = if useI386Bootstrap then i386Bootstrap.mes else callPackage ./mes { };
-      mes-libc = if useI386Bootstrap then i386Bootstrap.mes-libc else callPackage ./mes/libc.nix { };
 
       tinycc-musl-intermediate = lib.recurseIntoAttrs (
         callPackage ./tinycc/musl.nix {
