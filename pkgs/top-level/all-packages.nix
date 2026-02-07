@@ -8779,6 +8779,18 @@ with pkgs;
         inherit (stdenv) hostPlatform;
       };
 
+  minimal-bootstrap-lb = recurseIntoAttrs (
+    import ../os-specific/linux/minimal-bootstrap-lb {
+      inherit (stdenv) buildPlatform hostPlatform;
+      inherit lib config;
+      fetchurl = import ../build-support/fetchurl/boot.nix {
+        inherit (stdenv.buildPlatform) system;
+        inherit (config) rewriteURL;
+      };
+      checkMeta = callPackage ../stdenv/generic/check-meta.nix { inherit (stdenv) hostPlatform; };
+    }
+  );
+
   aggregateModules =
     modules:
     callPackage ../os-specific/linux/kmod/aggregator.nix {

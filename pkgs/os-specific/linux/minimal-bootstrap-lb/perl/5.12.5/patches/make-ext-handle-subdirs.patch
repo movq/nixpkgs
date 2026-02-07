@@ -1,0 +1,27 @@
+From 14f2f43a46f4e8f8e338c3f95f973cd6f3b7c0fd Mon Sep 17 00:00:00 2001
+From: Mike <mike@example.com>
+Date: Sat, 22 Feb 2026 17:45:00 +0000
+Subject: [PATCH] make_ext: handle nested extension paths in cpan/dist
+
+---
+ make_ext.pl | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git perl-5.12.5/make_ext.pl perl-5.12.5/make_ext.pl
+index 6018bf6..8b162b2 100644
+--- perl-5.12.5/make_ext.pl
++++ perl-5.12.5/make_ext.pl
+@@ -262,6 +262,11 @@ foreach my $spec (@extspec)  {
+ 	if (-d "$dir/$copy") {
+ 	    $ext_pathname = "$dir/$copy";
+ 	    last;
++	}
++	# Nested extensions such as Encode/Byte live under cpan/Encode/Byte.
++	if (-d "$dir/$spec") {
++	    $ext_pathname = "$dir/$spec";
++	    last;
+ 	}
+     }
+ 
+-- 
+2.49.1

@@ -7,7 +7,6 @@
 let
   minbootSupportedSystems = [
     "i686-linux"
-    "x86_64-linux"
   ];
   minbootSupported = builtins.elem localSystem.system minbootSupportedSystems;
 in

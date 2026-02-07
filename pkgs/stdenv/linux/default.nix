@@ -65,6 +65,9 @@
     let
       table = {
         glibc = {
+          x86_64-linux = import ./bootstrap-files/x86_64-unknown-linux-gnu-from-source.nix {
+            inherit lib config;
+          };
           armv5tel-linux = import ./bootstrap-files/armv5tel-unknown-linux-gnueabi.nix;
           armv6l-linux = import ./bootstrap-files/armv6l-unknown-linux-gnueabihf.nix;
           armv7l-linux = import ./bootstrap-files/armv7l-unknown-linux-gnueabihf.nix;

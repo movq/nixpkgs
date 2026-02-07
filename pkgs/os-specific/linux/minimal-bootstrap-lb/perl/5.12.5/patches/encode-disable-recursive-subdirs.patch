@@ -1,0 +1,23 @@
+From 42caa72c43e4f67eaf0fcba37d0d1849a8db8f3d Mon Sep 17 00:00:00 2001
+From: Mike <mike@example.com>
+Date: Sat, 22 Feb 2026 18:02:00 +0000
+Subject: [PATCH] Encode: disable recursive subdir builds
+
+---
+ perl-5.12.5/cpan/Encode/Makefile.PL | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git perl-5.12.5/cpan/Encode/Makefile.PL perl-5.12.5/cpan/Encode/Makefile.PL
+index 6b31f74..71d5181 100644
+--- perl-5.12.5/cpan/Encode/Makefile.PL
++++ perl-5.12.5/cpan/Encode/Makefile.PL
+@@ -47,6 +47,7 @@ WriteMakefile(
+     @man,
+     INC         => '-I' . File::Spec->catfile( '.', 'Encode' ),
+     PMLIBDIRS   => \@pmlibdirs,
++    DIR         => [],
+     INSTALLDIRS => 'perl',
+ );
+ 
+-- 
+2.49.1
