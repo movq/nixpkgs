@@ -89,6 +89,12 @@ lib.makeScope
             gnumake = gnumake-3_82;
             inherit gzip;
           };
+
+          gnused-mes = i386self.callPackage ./gnused/mes.nix {
+            tinycc = tinycc-0_9_27;
+            gnumake = gnumake-3_82;
+            inherit gnutar gzip;
+          };
         });
 
       bash_2_05 = callPackage ./bash/2.nix { tinycc = tinycc-mes; };
@@ -278,11 +284,6 @@ lib.makeScope
         gnused = gnused-mes;
       };
 
-      gnused-mes = callPackage ./gnused/mes.nix {
-        bash = bash_2_05;
-        tinycc = tinycc-bootstrappable;
-      };
-
       gnused-static = callPackage ./gnused/static.nix {
         gcc = gcc-latest;
         gnumake = gnumake-musl;
@@ -374,6 +375,7 @@ lib.makeScope
         patch-2_5_9
         gzip
         gnutar
+        gnused-mes
         ;
 
       tinycc-musl-intermediate = lib.recurseIntoAttrs (
