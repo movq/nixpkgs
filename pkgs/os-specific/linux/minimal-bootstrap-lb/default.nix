@@ -169,6 +169,15 @@ lib.makeScope
             tinycc = tinycc-musl-v2;
             gnumake = gnumake-mes;
           };
+
+          musl-v3 = i386self.callPackage ./musl/v3.nix {
+            bash = bash-mes;
+            tinycc = tinycc-musl-v2;
+            gnumake = gnumake-mes;
+            gnupatch = gnupatch-mes;
+            gnused = gnused-mes;
+            grep = grep-2_4;
+          };
         });
 
       # Early bootstrap stages run as i386
@@ -198,6 +207,7 @@ lib.makeScope
         musl-tcc
         tinycc-musl-v2
         grep-2_4
+        musl-v3
         ;
 
       inherit (callPackage ./utils.nix { }) derivationWithMeta writeTextFile writeText;
