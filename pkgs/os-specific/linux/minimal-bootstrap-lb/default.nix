@@ -178,6 +178,13 @@ lib.makeScope
             gnused = gnused-mes;
             grep = grep-2_4;
           };
+
+          gnused-4_0_9 = i386self.callPackage ./gnused/musl-v3.nix {
+            bash = bash-mes;
+            tinycc = tinycc-musl-v2;
+            musl = musl-v3;
+            gnumake = gnumake-mes;
+          };
         });
 
       # Early bootstrap stages run as i386
@@ -208,6 +215,7 @@ lib.makeScope
         tinycc-musl-v2
         grep-2_4
         musl-v3
+        gnused-4_0_9
         ;
 
       inherit (callPackage ./utils.nix { }) derivationWithMeta writeTextFile writeText;
