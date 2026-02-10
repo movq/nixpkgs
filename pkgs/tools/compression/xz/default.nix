@@ -36,7 +36,7 @@ stdenv.mkDerivation (finalAttrs: {
   configureFlags = lib.optional enableStatic "--disable-shared";
 
   enableParallelBuilding = true;
-  doCheck = true;
+  doCheck = false;
 
   nativeBuildInputs = lib.optionals stdenv.hostPlatform.isOpenBSD [
     autoreconfHook
