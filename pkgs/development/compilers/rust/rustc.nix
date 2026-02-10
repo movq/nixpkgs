@@ -56,7 +56,7 @@ stdenv.mkDerivation (finalAttrs: {
   inherit version;
 
   src = fetchurl {
-    url = "https://static.rust-lang.org/dist/rustc-${version}-src.tar.gz";
+    url = "https://static.rust-lang.org/dist/rustc-${version}-src.tar.xz";
     inherit sha256;
     # See https://nixos.org/manual/nixpkgs/stable/#using-git-bisect-on-the-rust-compiler
     passthru.isReleaseTarball = true;
@@ -260,7 +260,7 @@ stdenv.mkDerivation (finalAttrs: {
     ++ optionals stdenv.targetPlatform.isMusl [
       "${setTarget}.musl-root=${pkgsBuildTarget.targetPackages.stdenv.cc.libc}"
     ]
-    ++ optionals stdenv.targetPlatform.rust.isNoStdTarget [
+    ++ [
       "--disable-docs"
     ]
     ++ optionals (stdenv.hostPlatform.isDarwin && stdenv.hostPlatform.isx86_64) [
@@ -323,7 +323,20 @@ stdenv.mkDerivation (finalAttrs: {
         runHook postInstall
       ''
     else
-      null;
+      # Use --keep-stage 1 to reuse stage1 artifacts from the build phase.
+      # Without this, the install phase (a separate x.py invocation) rebuilds
+      # the stage2 compiler from scratch. This happens because the build phase
+      # builds cross-target stds (wasm32, bpf) using library/alloc/Cargo.toml
+      # (a different Cargo workspace) AFTER building the host std using
+      # library/sysroot/Cargo.toml, and they share the same CARGO_TARGET_DIR.
+      # The cross-target builds overwrite Cargo's workspace metadata, so when
+      # the install phase tries to build host std again, Cargo sees a workspace
+      # mismatch and recompiles everything.
+      ''
+        runHook preInstall
+        python x.py install --keep-stage 1 -j $NIX_BUILD_CORES
+        runHook postInstall
+      '';
 
   # the rust build system complains that nix alters the checksums
   dontFixLibtool = true;
@@ -416,7 +429,7 @@ stdenv.mkDerivation (finalAttrs: {
   postInstall =
     lib.optionalString (enableRustcDev && !fastCross) ''
       # install rustc-dev components. Necessary to build rls, clippy...
-      python x.py dist rustc-dev
+      python x.py dist rustc-dev --keep-stage 1
       tar xf build/dist/rustc-dev*tar.gz
       cp -r rustc-dev*/rustc-dev*/lib/* $out/lib/
       rm $out/lib/rustlib/install.log
@@ -427,6 +440,9 @@ stdenv.mkDerivation (finalAttrs: {
 
     ''
     + ''
+      # Ensure doc and man outputs exist even when docs are disabled.
+      mkdir -p $doc $man
+
       # remove references to llvm-config in lib/rustlib/x86_64-unknown-linux-gnu/codegen-backends/librustc_codegen_llvm-llvm.so
       # and thus a transitive dependency on ncurses
       find $out/lib -name "*.so" -type f -exec remove-references-to -t ${llvmShared} '{}' '+'

@@ -2,8 +2,7 @@
   rustcVersion,
   rustcSha256,
   enableRustcDev ? true,
-  bootstrapVersion,
-  bootstrapHashes,
+  bootstrapSourceHashes ? { },
   selectRustPackage,
   rustcPatches ? [ ],
   llvmShared,
@@ -63,18 +62,18 @@ in
   # and cargo would themselves be built with `buildRustCreate` like
   # everything else. Tools and `build.rs` and procedural macro dependencies
   # would be taken from `buildRustPackages` (and `bootstrapRustPackages` for
-  # anything provided prebuilt or their build-time dependencies to break
-  # cycles / purify builds). In this way, nixpkgs would be in control of all
-  # bootstrapping.
-  packages = {
-    prebuilt = callPackage ./bootstrap.nix {
-      version = bootstrapVersion;
-      hashes = bootstrapHashes;
+  # bootstrap tools or their build-time dependencies to break cycles / purify
+  # builds). In this way, nixpkgs would be in control of all bootstrapping.
+  packages = rec {
+    bootstrap = callPackage ./bootstrap.nix {
+      sourceHashes = bootstrapSourceHashes;
     };
+    # Compatibility alias: historically this set contained binary prebuilt tools.
+    prebuilt = bootstrap;
     stable = lib.makeScope newScope (
       self:
       let
-        # Like `buildRustPackages`, but may also contain prebuilt binaries to
+        # Like `buildRustPackages`, but may also contain bootstrap tools to
         # break cycle. Just like `bootstrapTools` for nixpkgs as a whole,
         # nothing in the final package set should refer to this.
         bootstrapRustPackages =
@@ -84,7 +83,12 @@ in
             self.buildRustPackages.overrideScope (
               _: _:
               lib.optionalAttrs (stdenv.buildPlatform == stdenv.hostPlatform)
-                (selectRustPackage pkgsBuildHost).packages.prebuilt
+                (
+                  let
+                    selectedPackages = (selectRustPackage pkgsBuildHost).packages;
+                  in
+                  if selectedPackages ? bootstrap then selectedPackages.bootstrap else selectedPackages.prebuilt
+                )
             );
         bootRustPlatform = makeRustPlatform bootstrapRustPackages;
       in

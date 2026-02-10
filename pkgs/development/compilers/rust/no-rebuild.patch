@@ -1,0 +1,75 @@
+diff -ruN a/src/bootstrap/src/core/build_steps/compile.rs b/src/bootstrap/src/core/build_steps/compile.rs
+--- a/src/bootstrap/src/core/build_steps/compile.rs	2026-02-28 17:29:30.386832348 +0000
++++ b/src/bootstrap/src/core/build_steps/compile.rs	2026-02-28 17:29:53.511918650 +0000
+@@ -1863,10 +1863,6 @@
+         let sysroot = sysroot_dir(compiler.stage);
+         trace!(stage = ?compiler.stage, ?sysroot);
+ 
+-        builder.do_if_verbose(|| {
+-            println!("Removing sysroot {} to avoid caching bugs", sysroot.display())
+-        });
+-        let _ = fs::remove_dir_all(&sysroot);
+         t!(fs::create_dir_all(&sysroot));
+ 
+         // In some cases(see https://github.com/rust-lang/rust/issues/109314), when the stage0
+diff -ruN a/src/bootstrap/src/core/builder/mod.rs b/src/bootstrap/src/core/builder/mod.rs
+--- a/src/bootstrap/src/core/builder/mod.rs	2026-02-28 17:29:30.386795885 +0000
++++ b/src/bootstrap/src/core/builder/mod.rs	2026-02-28 17:29:59.860967423 +0000
+@@ -943,19 +943,8 @@
+         let sysroot = builder.sysroot(self.compiler).join(relative_sysroot_libdir).join("rustlib");
+ 
+         if !builder.config.dry_run() {
+-            // Avoid deleting the `rustlib/` directory we just copied (in `impl Step for
+-            // Sysroot`).
+-            if !builder.download_rustc() {
+-                let sysroot_target_libdir = sysroot.join(self.target).join("lib");
+-                builder.do_if_verbose(|| {
+-                    eprintln!(
+-                        "Removing sysroot {} to avoid caching bugs",
+-                        sysroot_target_libdir.display()
+-                    )
+-                });
+-                let _ = fs::remove_dir_all(&sysroot_target_libdir);
+-                t!(fs::create_dir_all(&sysroot_target_libdir));
+-            }
++            let sysroot_target_libdir = sysroot.join(self.target).join("lib");
++            t!(fs::create_dir_all(&sysroot_target_libdir));
+ 
+             if self.compiler.stage == 0 {
+                 // The stage 0 compiler for the build triple is always pre-built. Ensure that
+diff -ruN a/src/bootstrap/src/utils/build_stamp.rs b/src/bootstrap/src/utils/build_stamp.rs
+--- a/src/bootstrap/src/utils/build_stamp.rs	2026-02-28 17:29:30.386877787 +0000
++++ b/src/bootstrap/src/utils/build_stamp.rs	2026-02-28 17:29:50.131892682 +0000
+@@ -9,7 +9,7 @@
+ 
+ use crate::core::builder::Builder;
+ use crate::core::config::TargetSelection;
+-use crate::utils::helpers::{hex_encode, mtime};
++use crate::utils::helpers::hex_encode;
+ use crate::{CodegenBackendKind, Compiler, Mode, helpers, t};
+ 
+ #[cfg(test)]
+@@ -108,19 +108,14 @@
+ /// Clear out `dir` if `input` is newer.
+ ///
+ /// After this executes, it will also ensure that `dir` exists.
+-pub fn clear_if_dirty(builder: &Builder<'_>, dir: &Path, input: &Path) -> bool {
++pub fn clear_if_dirty(_builder: &Builder<'_>, dir: &Path, _input: &Path) -> bool {
+     let stamp = BuildStamp::new(dir);
+-    let mut cleared = false;
+-    if mtime(stamp.path()) < mtime(input) {
+-        builder.do_if_verbose(|| println!("Dirty - {}", dir.display()));
+-        let _ = fs::remove_dir_all(dir);
+-        cleared = true;
+-    } else if stamp.path().exists() {
+-        return cleared;
++    if stamp.path().exists() {
++        return false;
+     }
+     t!(fs::create_dir_all(dir));
+     t!(fs::File::create(stamp.path()));
+-    cleared
++    false
+ }
+ 
+ /// Cargo's output path for librustc_codegen_llvm in a given stage, compiled by a particular
