@@ -6,9 +6,9 @@
 }:
 
 let
-  version = "0.11.2";
+  version = "0.12.0";
   tag = "v${version}";
-  rev = "b6754f574f8846eb842feba4ccbeeecb10bdfacc";
+  rev = "2d14b09a7e75166bec4413f48f61e3b3cd4de8ca";
 in
 
 stdenv.mkDerivation rec {
@@ -19,14 +19,16 @@ stdenv.mkDerivation rec {
   src = fetchFromGitHub {
     owner = "thepowersgang";
     repo = "mrustc";
-    rev = tag;
-    hash = "sha256-HW9+2mXri3ismeNeaDoTsCY6lxeH8AELegk+YbIn7Jw=";
+    inherit rev;
+    hash = "sha256-wqHTTnk9c1khLsN6e0v703tUoTlpncMwZPXTKEVZ33s=";
   };
 
   postPatch = ''
     sed -i 's/\$(shell git show --pretty=%H -s)/${rev}/' Makefile
     sed -i 's/\$(shell git symbolic-ref -q --short HEAD || git describe --tags --exact-match)/${tag}/' Makefile
     sed -i 's/\$(shell git diff-index --quiet HEAD; echo $$?)/0/' Makefile
+    # GCC 15 no longer pulls fixed-width integer typedefs transitively.
+    sed -i '1i#include <cstdint>' src/common.hpp
     sed '1i#include <limits>' -i src/trans/codegen_c.cpp
   '';
 

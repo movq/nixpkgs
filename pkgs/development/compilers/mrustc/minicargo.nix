@@ -16,13 +16,18 @@ stdenv.mkDerivation rec {
   makefile = "minicargo.mk";
   makeFlags = [ "bin/minicargo" ];
 
+  postPatch = ''
+    # gcc15 requires this include for uint64_t in tools/minicargo/build.cpp.
+    sed -i '/^#include <fstream>$/a #include <cstdint>' tools/minicargo/build.cpp
+  '';
+
   installPhase = ''
     runHook preInstall
     mkdir -p $out/bin
     cp bin/minicargo $out/bin
 
-    # without it, minicargo defaults to "<minicargo_path>/../bin/mrustc"
-    wrapProgram "$out/bin/minicargo" --set MRUSTC_PATH ${mrustc}/bin/mrustc
+    # Keep a default, but allow callers (e.g. run_rustc) to override MRUSTC_PATH.
+    wrapProgram "$out/bin/minicargo" --set-default MRUSTC_PATH ${mrustc}/bin/mrustc
     runHook postInstall
   '';
 
