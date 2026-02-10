@@ -63,30 +63,26 @@ import ./default.nix
     # For use at runtime
     llvmShared = llvmSharedFor pkgsHostTarget;
 
-    # Note: the version MUST be the same version that we are building. Upstream
-    # ensures that each released compiler can compile itself:
-    # https://github.com/NixOS/nixpkgs/pull/351028#issuecomment-2438244363
-    bootstrapVersion = "1.92.0";
-
-    # fetch hashes by running `print-hashes.sh ${bootstrapVersion}`
-    bootstrapHashes = {
-      i686-unknown-linux-gnu = "0028378e76fc10255677a5398886664f619c15757f3e830d7464f3c716bc3f7e";
-      x86_64-unknown-linux-gnu = "6e5efd6c25953b2732d4e6b1842512536650c68cf72a8b99a0fc566012dd6ca5";
-      x86_64-unknown-linux-musl = "1a257be51efac7bea14d5566e521777b85c473ee42524a38abb181c6443c38e4";
-      arm-unknown-linux-gnueabihf = "e8d400cc169f858915f8c5bd23070d5b7f63ca8b1d14a5ef53423d952e33a794";
-      armv7-unknown-linux-gnueabihf = "1c0f84532a91f3ce7223613565f15f8992a8e09859d699c163a7782d15d6beef";
-      aarch64-unknown-linux-gnu = "c812028423c3d7dd7ba99f66101e9e1aa3f66eab44a1285f41c363825d49dca4";
-      aarch64-unknown-linux-musl = "ad412daf7b31aadbeb12f836ed14983f5d1d0717bd444e305f94ee68ea822fcd";
-      x86_64-apple-darwin = "fc6868991e61e9262272effbb8956b23428430f5f4300c1b48eaae3969f8af2a";
-      aarch64-apple-darwin = "235a6cca2dd4881130a9ae61ad1149bbf28bba184dd4621700f0c98c97457716";
-      powerpc64-unknown-linux-gnu = "189dd8a254202d32066f123b42497b88f809a11680842e67c68e48a4200b6caf";
-      powerpc64le-unknown-linux-gnu = "e2fe00a3c91f21c52947ebf96b4da016c9def5ccfedd1c335f30746db58bbf35";
-      powerpc64le-unknown-linux-musl = "4655468ef2ccc3d6eaf55015054970ab4a8fb79d853add830c9e4016551b7101";
-      riscv64gc-unknown-linux-gnu = "c2d1b80d3c69edcca5c0d2b2042fad43fdb06fa614a8cd09063c1c259dca8a7e";
-      s390x-unknown-linux-gnu = "1ca05b6bd892c358ae0a12acbb605560529d80633abebb43ec004142205d7bd2";
-      loongarch64-unknown-linux-gnu = "2f9a85ff1816d6e28a96c1f5b9c9c5d9fe710a20a36f172c41bc289cc780956e";
-      loongarch64-unknown-linux-musl = "4fe07780b1ac08baee71de2ddbd275ba14cc082df54ea5a95055514130152546";
-      x86_64-unknown-freebsd = "f32b7d8d5ad5c186fa496dd0b7202899f89e93870940e41c37e576f324494189";
+    bootstrapSourceHashes = {
+      "1.74.0" = "sha256-I3BeOMGjes/X+7khxd2HcmGUdugNCzs5rI60W8DDMYc=";
+      "1.75.0" = "sha256-RSb3htZz5IWf8q+gurK6E8kYt5ZRmiXBrM4G26lUI0A=";
+      "1.76.0" = "sha256-gFSCtDZEKmeG0nDKy6uPAFKeBhQbJ7f7AZCbl85PNGQ=";
+      "1.77.2" = "sha256-TSFMQYnk3ZNNR+hp+lchssM9u73qIfL8f6bfPzjB3qI=";
+      "1.78.0" = "sha256-gGWCTwJV+qOQHbggbm+UI/b4wHzsKLxvJ5fGyUgxDs4=";
+      "1.79.0" = "sha256-q4JuhLjUjsbtozcAZQNN6owAb2qUbXipuhK8tQ5tPHo=";
+      "1.80.1" = "sha256-arebcNxXc3od43jyEvz4hS1n/mzyctEioVs+oTvneUc=";
+      "1.81.0" = "sha256-NiF+9+MvQKGA49eb1ma039rtSd04ECOl+3Zf0S0Aks4=";
+      "1.82.0" = "sha256-Enagu4+hIoi6b6lll9KLQOdMRCV8BR07wCwrBJuzghA=";
+      "1.83.0" = "sha256-exHUJC2rCSGn1UdYrT/oBRU8l5wURiX+zeEXNXYPl98=";
+      "1.84.1" = "sha256-4j7HR6Bv/T6UFVBG9AtmZKwVLJ7jwq39kDU6fM/yQiY=";
+      "1.85.1" = "sha256-sfv4Ce/p8DaTlAHhQmMcIBpTvPQ+wWlr2fUpC6I2omY=";
+      "1.86.0" = "sha256-2Tnq2gZdyCep1Nu1W9SFM60UwW5/CkLnAUcCnIKncHs=";
+      "1.87.0" = "sha256-hiO4ZRiT6Mauv6RbapBkWk9lL3sYGJoJkqkNEawmMfQ=";
+      "1.88.0" = "sha256-DB3LtPdiUT0CHhooLArFjApCNkKzpr9YHK+1QU30GT4=";
+      "1.89.0" = "sha256-C51VYQ2CcOBsRPRZ0eK3kYpeZzgJxZKr7ZucYA4z2Vo=";
+      "1.90.0" = "sha256-a/6t3ZD/2i8GNJKwkr/tklxLjHAVebr0sTFuAhRw2qw=";
+      "1.91.1" = "sha256-ZkAbuBXiNsxrKqy74jthsobB/iemeQLnwCIs/nez26s=";
+      "1.92.0" = "sha256-6+4XC/5MTfxZUhoQHeZR5VNPTa6Il1alyXyp6kDQwwc=";
     };
 
     selectRustPackage = pkgs: pkgs.rust_1_92;

@@ -2,8 +2,7 @@
   rustcVersion,
   rustcSha256,
   enableRustcDev ? true,
-  bootstrapVersion,
-  bootstrapHashes,
+  bootstrapSourceHashes ? { },
   selectRustPackage,
   rustcPatches ? [ ],
   llvmShared,
@@ -68,8 +67,7 @@ in
   # bootstrapping.
   packages = {
     prebuilt = callPackage ./bootstrap.nix {
-      version = bootstrapVersion;
-      hashes = bootstrapHashes;
+      sourceHashes = bootstrapSourceHashes;
     };
     stable = lib.makeScope newScope (
       self:

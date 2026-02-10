@@ -1,6 +1,10 @@
 {
   "clang/gnu-install-dirs.patch" = [
     {
+      before = "19";
+      path = ../18;
+    }
+    {
       after = "22";
       path = ../22;
     }
@@ -127,6 +131,10 @@
     }
   ];
   "mlir/mlir-add-include-cstdint.patch" = [
+    {
+      before = "19";
+      path = ../18;
+    }
     {
       after = "18";
       before = "19";
