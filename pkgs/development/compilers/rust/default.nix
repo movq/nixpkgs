@@ -66,6 +66,7 @@ in
   # cycles / purify builds). In this way, nixpkgs would be in control of all
   # bootstrapping.
   packages = {
+    testBoot = callPackage ./bootstrap/1_74.nix {};
     prebuilt = callPackage ./bootstrap.nix {
       sourceHashes = bootstrapSourceHashes;
     };
