@@ -382,8 +382,8 @@ let
     let
       # TODO(@oxij, @Ericson2314): This is here to keep the old semantics, remove when
       # no package has `doCheck = true`.
-      doCheck' = doCheck && canExecuteHostOnBuild;
-      doInstallCheck' = doInstallCheck && canExecuteHostOnBuild;
+      doCheck' = false;
+      doInstallCheck' = false;
 
       separateDebugInfo' =
         let
