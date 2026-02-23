@@ -46,6 +46,10 @@
   ];
   "llvm/gnu-install-dirs-polly.patch" = [
     {
+      before = "18";
+      path = ../17;
+    }
+    {
       after = "20";
       path = ../20;
     }

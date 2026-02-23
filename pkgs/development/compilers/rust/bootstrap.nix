@@ -17,7 +17,6 @@
   libffi,
   libgit2,
   mrustc,
-  mrustc-minicargo,
   llvm_17,
   llvm_18,
   llvm_19,
@@ -94,7 +93,6 @@ rec {
       cmake
       file
       mrustc
-      mrustc-minicargo
       perl
       pkg-config
       python3
@@ -127,6 +125,10 @@ rec {
       ln -s "$workdir/sources/rustc-${initialVersion}-src.tar.xz" "$workdir/mrustc/rustc-${initialVersion}-src.tar.xz"
 
       cd "$workdir/mrustc"
+
+      # gcc15 requires this include for uint64_t in tools/minicargo/build.cpp.
+      substituteInPlace tools/minicargo/build.cpp \
+        --replace-fail "#include <fstream>" "#include <fstream>\n#include <cstdint>"
 
       substituteInPlace minicargo.mk \
         --replace-fail "tar.gz" "tar.xz" \

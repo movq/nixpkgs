@@ -16,6 +16,12 @@ stdenv.mkDerivation rec {
   makefile = "minicargo.mk";
   makeFlags = [ "bin/minicargo" ];
 
+  postPatch = ''
+    # gcc15 requires this include for uint64_t in tools/minicargo/build.cpp.
+    substituteInPlace tools/minicargo/build.cpp \
+      --replace-fail "#include <fstream>" "#include <fstream>\n#include <cstdint>"
+  '';
+
   installPhase = ''
     runHook preInstall
     mkdir -p $out/bin
