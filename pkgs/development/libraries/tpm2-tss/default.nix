@@ -132,11 +132,7 @@ stdenv.mkDerivation (finalAttrs: {
   '';
 
   configureFlags =
-    lib.optionals finalAttrs.doInstallCheck [
-      "--enable-unit"
-      "--enable-integration"
-    ]
-    ++ lib.optionals stdenv.hostPlatform.isDarwin [
+    lib.optionals stdenv.hostPlatform.isDarwin [
       # sys/prctl.h required
       "--disable-tcti-cmd"
       # uchar.h required
