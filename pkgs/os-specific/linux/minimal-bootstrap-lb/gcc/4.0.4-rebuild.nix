@@ -78,11 +78,11 @@ bash.runCommand "${pname}-${version}"
   ''
     # Unpack
     cp ${src} gcc-core.tar.bz2
-    ${bzip2}/bin/bzip2 -d -f gcc-core.tar.bz2
-    ${gnutar}/bin/tar xf gcc-core.tar
+    bzip2 -d -f gcc-core.tar.bz2
+    tar xf gcc-core.tar
     rm gcc-core.tar
 
-    unxz --file ${automakeSrc} | ${gnutar}/bin/tar xf -
+    unxz --file ${automakeSrc} | tar xf -
 
     cd gcc-${version}
 
@@ -98,10 +98,10 @@ bash.runCommand "${pname}-${version}"
     compiler="''${PWD}/gcc-for-build"
 
     # Prepare
-    ${gnused}/bin/sed -i 's/struct siginfo/siginfo_t/' gcc/config/i386/linux-unwind.h
+    sed -i 's/struct siginfo/siginfo_t/' gcc/config/i386/linux-unwind.h
     for script in move-if-change mkinstalldirs install-sh; do
       if [ -f "$script" ] && head -n 1 "$script" | ${grep}/bin/grep -q '^#! */bin/sh$'; then
-        ${gnused}/bin/sed -i "1s|^#! */bin/sh$|#! ${bash}/bin/bash|" "$script"
+        sed -i "1s|^#! */bin/sh$|#! ${bash}/bin/bash|" "$script"
         chmod +x "$script"
       fi
     done
@@ -146,17 +146,17 @@ bash.runCommand "${pname}-${version}"
     touch libiberty/obstacks.texi
 
     rm libcpp/ucnid.h
-    ${perl}/bin/perl libcpp/ucnid.pl < libcpp/ucnid.tab > libcpp/ucnid.h
+    perl libcpp/ucnid.pl < libcpp/ucnid.tab > libcpp/ucnid.h
 
-    ${gnused}/bin/sed -i 's/YYLEX/yylex()/' gcc/c-parse.in
+    sed -i 's/YYLEX/yylex()/' gcc/c-parse.in
     rm gcc/c-parse.c
     rm gcc/gengtype-yacc.c gcc/gengtype-yacc.h
     rm intl/plural.c
 
     rm gcc/gengtype-lex.c
 
-    ${findutils}/bin/find . -name '*.gmo' -delete
-    ${findutils}/bin/find . -name '*.info' -delete
+    find . -name '*.gmo' -delete
+    find . -name '*.info' -delete
     rm -f gcc/doc/*.1 gcc/doc/*.7
 
     # Configure
@@ -167,7 +167,7 @@ bash.runCommand "${pname}-${version}"
       mkdir "''${dir}"
       (
         cd "''${dir}"
-        CC="''${compiler}" \
+        CC="''${compiler}" CFLAGS="-O2" \
           ../../''${dir}/configure \
             --prefix=''${out} \
             --libdir=''${out}/lib \
@@ -183,27 +183,17 @@ bash.runCommand "${pname}-${version}"
     # Build
     ln -s . "build/build-${target}"
     for dir in libiberty libcpp gcc; do
-      ${gnumake}/bin/make -j1 -C "build/''${dir}" \
+      make -j $NIX_BUILD_CORES -C "build/''${dir}" \
         LIBGCC2_INCLUDES="-I${musl}/include" \
         STMP_FIXINC= \
-        build_tooldir=${musl}
+        build_tooldir=${musl} \
+        CFLAGS="-O2"
     done
 
     # Install
     mkdir -p ''${out}/lib/gcc/${target}/${version}/install-tools/include
-    ${gnumake}/bin/make -C build/gcc install STMP_FIXINC= build_tooldir=${musl}
+    make -C build/gcc install STMP_FIXINC= build_tooldir=${musl}
 
     mkdir -p ''${out}/lib/gcc/${target}/${version}/include
     cp gcc/gsyslimits.h ''${out}/lib/gcc/${target}/${version}/include/syslimits.h
-    # Strip debug symbols from toolchain artifacts to keep bootstrap outputs small.
-    shopt -s nullglob globstar
-    for f in ''${out}/bin/**/* ''${out}/lib/**/* ''${out}/libexec/**/*; do
-      [ -f "$f" ] || continue
-      if command -v strip >/dev/null 2>&1; then
-        strip --strip-debug "$f" 2>/dev/null || true
-      fi
-      if command -v ${target}-strip >/dev/null 2>&1; then
-        ${target}-strip --strip-debug "$f" 2>/dev/null || true
-      fi
-    done
   ''

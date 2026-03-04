@@ -257,7 +257,7 @@ bash.runCommand "${pname}-${version}"
     for dir in libiberty libsframe bfd opcodes libctf binutils gas gprof ld; do
       ${gnumake}/bin/make -j "$NIX_BUILD_CORES" -C "$dir" \
         tooldir=''${out} \
-        CFLAGS="-std=c99" \
+        CFLAGS="-std=c99 -Os" \
         MAKEINFO=true
     done
 

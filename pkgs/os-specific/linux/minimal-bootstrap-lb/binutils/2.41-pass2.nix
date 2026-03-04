@@ -302,7 +302,7 @@ bash.runCommand "${pname}-${version}-pass2"
       --disable-gprofng \
       --enable-threads \
       --enable-64-bit-bfd \
-      --enable-gold \
+      --disable-gold \
       --enable-ld=default \
       --enable-install-libiberty \
       --enable-deterministic-archives \
