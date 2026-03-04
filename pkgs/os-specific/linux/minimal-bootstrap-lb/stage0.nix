@@ -18,6 +18,36 @@ let
       ;
   };
 
+  glibc-stage0 = derivation {
+    name = "glibc-2.42-stage0";
+    system = buildPlatform.system;
+    builder = "${minimal-bootstrap-lb.bash-5_2_15}/bin/bash";
+    args = [
+      "-e"
+      "-c"
+      ''
+        cp -a ${minimal-bootstrap-lb.glibc-2_42} "$out"
+        chmod -R u+w "$out"
+
+        for script in "$out"/lib/*.so; do
+          if [ -f "$script" ] && head -n 1 "$script" | ${minimal-bootstrap-lb.grep-3_7}/bin/grep -q '^/\* GNU ld script'; then
+            ${minimal-bootstrap-lb.gnused-4_8}/bin/sed -i \
+              -e "s# //lib/# $out/lib/#g" \
+              -e "s# =/lib/# $out/lib/#g" \
+              -e "s# /lib/# $out/lib/#g" \
+              -e "s# //usr/lib/# $out/lib/#g" \
+              -e "s# =/usr/lib/# $out/lib/#g" \
+              -e "s# /usr/lib/# $out/lib/#g" \
+              "$script"
+          fi
+        done
+
+        chmod -R a-w "$out"
+      ''
+    ];
+    PATH = lib.makeBinPath [ minimal-bootstrap-lb.coreutils-9_4 ];
+  };
+
   markFromMinBootstrap =
     drv:
     lib.extendDerivation true {
@@ -58,5 +88,5 @@ in
   gcc-latest = markFromMinBootstrap minimal-bootstrap-lb.gcc-15_2_0;
   gcc-glibc = markFromMinBootstrap minimal-bootstrap-lb.gcc-15_2_0-gnu;
   musl-static = markFromMinBootstrap minimal-bootstrap-lb.musl-1_2_5;
-  glibc = markFromMinBootstrap minimal-bootstrap-lb.glibc-2_42;
+  glibc = markFromMinBootstrap glibc-stage0;
 }
