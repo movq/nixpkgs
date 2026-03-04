@@ -444,6 +444,9 @@ bash.runCommand "${pname}-${version}"
       --enable-static \
       --disable-shared \
       --disable-plugins \
+      --disable-plugin \
+      --disable-lto \
+      --disable-lto-plugin \
       --disable-nls \
       --disable-threads \
       --disable-libssp \
@@ -454,6 +457,7 @@ bash.runCommand "${pname}-${version}"
       --disable-decimal-float \
       --disable-libmpx \
       --disable-libstdcxx-backtrace \
+      --disable-libstdcxx-pch \
       --disable-linux-futex \
       --disable-libvtv \
       --disable-libitm \
