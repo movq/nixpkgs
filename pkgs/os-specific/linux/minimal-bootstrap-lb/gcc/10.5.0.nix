@@ -374,12 +374,14 @@ bash.runCommand "${pname}-${version}"
     ${gnumake}/bin/make -j "$NIX_BUILD_CORES" \
       STMP_FIXINC= \
       LDFLAGS_FOR_TARGET="$targetLdflags" \
+      CFLAGS_FOR_TARGET="-O2" \
       MAKEINFO=true
 
     # Install
     ${gnumake}/bin/make -j "$NIX_BUILD_CORES" install \
       STMP_FIXINC= \
       LDFLAGS_FOR_TARGET="$targetLdflags" \
+      CFLAGS_FOR_TARGET="-O2" \
       MAKEINFO=true
     ln -s gcc ''${out}/bin/cc
     # Strip debug symbols from toolchain artifacts to keep bootstrap outputs small.
