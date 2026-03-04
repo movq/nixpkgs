@@ -127,6 +127,7 @@ bash.runCommand "${pname}-${version}-x86_64"
       RANLIB=${crossBinutils}/bin/${target}-ranlib \
       READELF=${crossBinutils}/bin/${target}-readelf \
       STRIP=${crossBinutils}/bin/${target}-strip \
+      CFLAGS="-O2" \
       ../configure \
       --prefix=/ \
       --libdir=/lib \
