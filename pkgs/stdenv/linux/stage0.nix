@@ -5,16 +5,19 @@
   bootstrapFiles,
 }:
 let
-  minbootSupportedSystems = [
-    "i686-linux"
-  ];
-  minbootSupported = builtins.elem localSystem.system minbootSupportedSystems;
+  useMinimalBootstrapLb = localSystem.system == "x86_64-linux" && localSystem.libc == "glibc";
+  minbootSupported = localSystem.system == "i686-linux" || useMinimalBootstrapLb;
 in
 if minbootSupported then
   let
     callPackage = lib.callPackageWith { inherit lib config; };
     minimal-bootstrap = lib.recurseIntoAttrs (
-      import ../../os-specific/linux/minimal-bootstrap {
+      import (
+        if useMinimalBootstrapLb then
+          ../../os-specific/linux/minimal-bootstrap-lb/stage0.nix
+        else
+          ../../os-specific/linux/minimal-bootstrap
+      ) {
         buildPlatform = localSystem;
         hostPlatform = localSystem;
         inherit lib config;
