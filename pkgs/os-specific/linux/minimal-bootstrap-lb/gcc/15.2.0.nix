@@ -466,8 +466,12 @@ bash.runCommand "${pname}-${version}-x86_64"
       --with-mpfr=${mpfr} \
       --with-mpc=${mpc} \
       --disable-plugins \
+      --disable-plugin \
+      --disable-lto \
+      --disable-lto-plugin \
       --disable-libssp \
       --disable-libsanitizer \
+      --disable-libstdcxx-pch \
       --program-transform-name= \
       --enable-languages=c,c++ \
       --with-system-zlib \
