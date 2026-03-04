@@ -65,7 +65,7 @@ bash.runCommand "${pname}-${version}-x86_64"
     export PATH="${crossGcc}/bin:${crossBinutils}/bin:$PATH"
 
     # Configure
-    CC=${crossGcc}/bin/gcc ./configure \
+    CFLAGS="-Os" CC=${crossGcc}/bin/gcc ./configure \
       --host=${target} \
       --prefix=/ \
       --libdir=/lib \

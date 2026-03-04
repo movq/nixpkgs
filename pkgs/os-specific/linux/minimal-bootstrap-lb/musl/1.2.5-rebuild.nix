@@ -83,7 +83,7 @@ bash.runCommand "${pname}-${version}-rebuild"
     export PATH="''${PWD}:${binutils}/bin:$PATH"
 
     # Configure
-    CC=cc ./configure \
+    CC=cc CFLAGS="-O2" ./configure \
       --host=${target} \
       --prefix=/ \
       --libdir=/lib \
