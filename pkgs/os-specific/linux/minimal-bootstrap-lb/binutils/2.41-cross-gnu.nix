@@ -301,7 +301,6 @@ bash.runCommand "${pname}-${version}"
       --disable-gprofng \
       --enable-threads \
       --enable-64-bit-bfd \
-      --enable-gold \
       --enable-ld=default \
       --enable-install-libiberty \
       --enable-deterministic-archives \
