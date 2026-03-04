@@ -26,6 +26,9 @@ in
       pkgs.writeShellApplication {
         name = "pre-switch-checks";
         text = preSwitchCheckScript;
+        checkPhase = ''
+          ${pkgs.stdenv.shellDryRun} "$target"
+        '';
       }
     );
   };
