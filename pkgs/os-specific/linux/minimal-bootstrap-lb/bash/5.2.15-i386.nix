@@ -69,6 +69,11 @@ let
                 fi
                 export NIX_BUILD_CORES
 
+                # Default to smaller binaries unless a package explicitly sets flags.
+                : "''${CFLAGS:=-Os -g0}"
+                : "''${CXXFLAGS:=''${CFLAGS}}"
+                export CFLAGS CXXFLAGS
+
                 bash -eux "$buildCommandPath"
               '')
             ];
