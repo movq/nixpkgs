@@ -210,4 +210,15 @@ bash.runCommand "${pname}-${version}"
     mkdir -p ''${out}/lib/gcc/${target}/${version}/include
     rm -f ''${out}/lib/gcc/${target}/${version}/include/syslimits.h
     cp gcc/gsyslimits.h ''${out}/lib/gcc/${target}/${version}/include/syslimits.h
+    # Strip debug symbols from toolchain artifacts to keep bootstrap outputs small.
+    shopt -s nullglob globstar
+    for f in ''${out}/bin/**/* ''${out}/lib/**/* ''${out}/libexec/**/*; do
+      [ -f "$f" ] || continue
+      if command -v strip >/dev/null 2>&1; then
+        strip --strip-debug "$f" 2>/dev/null || true
+      fi
+      if command -v ${target}-strip >/dev/null 2>&1; then
+        ${target}-strip --strip-debug "$f" 2>/dev/null || true
+      fi
+    done
   ''
