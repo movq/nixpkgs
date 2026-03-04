@@ -335,4 +335,15 @@ bash.runCommand "${pname}-${version}"
     mv ''${out}/lib/gcc/${target}/4.0.4/include/* ''${out}/lib/gcc/${target}/${version}/include/
     rmdir ''${out}/lib/gcc/${target}/4.0.4/include
     mv ''${out}/lib/gcc/${target}/4.0.4/* ''${out}/lib/gcc/${target}/${version}/
+    # Strip debug symbols from toolchain artifacts to keep bootstrap outputs small.
+    shopt -s nullglob globstar
+    for f in ''${out}/bin/**/* ''${out}/lib/**/* ''${out}/libexec/**/*; do
+      [ -f "$f" ] || continue
+      if command -v strip >/dev/null 2>&1; then
+        strip --strip-debug "$f" 2>/dev/null || true
+      fi
+      if command -v ${target}-strip >/dev/null 2>&1; then
+        ${target}-strip --strip-debug "$f" 2>/dev/null || true
+      fi
+    done
   ''
