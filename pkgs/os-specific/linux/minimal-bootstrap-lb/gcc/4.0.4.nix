@@ -75,11 +75,11 @@ bash.runCommand "${pname}-${version}"
   ''
     # Unpack
     cp ${src} gcc-core.tar.bz2
-    ${bzip2}/bin/bzip2 -d -f gcc-core.tar.bz2
-    ${gnutar}/bin/tar xf gcc-core.tar
+    bzip2 -d -f gcc-core.tar.bz2
+    tar xf gcc-core.tar
     rm gcc-core.tar
 
-    unxz --file ${automakeSrc} | ${gnutar}/bin/tar xf -
+    unxz --file ${automakeSrc} | tar xf -
 
     cd gcc-${version}
 
@@ -95,11 +95,11 @@ bash.runCommand "${pname}-${version}"
     export PATH="''${PWD}:$PATH"
 
     # Prepare
-    ${gnused}/bin/sed -i 's/ix86_attribute_table\[\]/ix86_attribute_table[10]/' gcc/config/i386/i386.c
-    ${gnused}/bin/sed -i 's/struct siginfo/siginfo_t/' gcc/config/i386/linux-unwind.h
+    sed -i 's/ix86_attribute_table\[\]/ix86_attribute_table[10]/' gcc/config/i386/i386.c
+    sed -i 's/struct siginfo/siginfo_t/' gcc/config/i386/linux-unwind.h
     for script in move-if-change mkinstalldirs install-sh; do
-      if [ -f "$script" ] && head -n 1 "$script" | ${grep}/bin/grep -q '^#! */bin/sh$'; then
-        ${gnused}/bin/sed -i "1s|^#! */bin/sh$|#! ${bash}/bin/bash|" "$script"
+      if [ -f "$script" ] && head -n 1 "$script" | grep -q '^#! */bin/sh$'; then
+        sed -i "1s|^#! */bin/sh$|#! ${bash}/bin/bash|" "$script"
         chmod +x "$script"
       fi
     done
@@ -144,9 +144,9 @@ bash.runCommand "${pname}-${version}"
     touch libiberty/obstacks.texi
 
     rm libcpp/ucnid.h
-    ${perl}/bin/perl libcpp/ucnid.pl < libcpp/ucnid.tab > libcpp/ucnid.h
+    perl libcpp/ucnid.pl < libcpp/ucnid.tab > libcpp/ucnid.h
 
-    ${gnused}/bin/sed -i 's/YYLEX/yylex()/' gcc/c-parse.in
+    sed -i 's/YYLEX/yylex()/' gcc/c-parse.in
     rm gcc/c-parse.c
     rm gcc/gengtype-yacc.c gcc/gengtype-yacc.h
     rm intl/plural.c
@@ -180,45 +180,36 @@ bash.runCommand "${pname}-${version}"
     done
     cd ..
 
-    ${gnused}/bin/sed -i 's/C_alloca/alloca/g' libiberty/alloca.c
-    ${gnused}/bin/sed -i 's/C_alloca/alloca/g' include/libiberty.h
+    sed -i 's/C_alloca/alloca/g' libiberty/alloca.c
+    sed -i 's/C_alloca/alloca/g' include/libiberty.h
 
     # Build
     ln -s . "build/build-${target}"
     mkdir -p build/gcc/include
     ln -s ../../../gcc/gsyslimits.h build/gcc/include/syslimits.h
 
-    ${gnumake}/bin/make -j1 -C build/gcc gengtype-yacc.c MAKEINFO=true build_tooldir=${musl}
+    make -j1 -C build/gcc gengtype-yacc.c MAKEINFO=true build_tooldir=${musl}
 
     for dir in libiberty libcpp; do
-      ${gnumake}/bin/make -j1 -C "build/''${dir}" \
+      make -j1 -C "build/''${dir}" \
         LIBGCC2_INCLUDES=-I${musl}/include \
         STMP_FIXINC= \
-        MAKEINFO=true
+        MAKEINFO=true \
+        CFLAGS=""
     done
 
-    ${gnumake}/bin/make -j1 -C build/gcc \
+    make -j1 -C build/gcc \
       LIBGCC2_INCLUDES=-I${musl}/include \
       STMP_FIXINC= \
       MAKEINFO=true \
-      build_tooldir=${musl}
+      build_tooldir=${musl} \
+      CFLAGS=""
 
     # Install
     mkdir -p ''${out}/lib/gcc/${target}/${version}/install-tools/include
-    ${gnumake}/bin/make -C build/gcc install STMP_FIXINC= MAKEINFO=true build_tooldir=${musl}
+    make -C build/gcc install STMP_FIXINC= MAKEINFO=true build_tooldir=${musl}
 
     mkdir -p ''${out}/lib/gcc/${target}/${version}/include
     rm -f ''${out}/lib/gcc/${target}/${version}/include/syslimits.h
     cp gcc/gsyslimits.h ''${out}/lib/gcc/${target}/${version}/include/syslimits.h
-    # Strip debug symbols from toolchain artifacts to keep bootstrap outputs small.
-    shopt -s nullglob globstar
-    for f in ''${out}/bin/**/* ''${out}/lib/**/* ''${out}/libexec/**/*; do
-      [ -f "$f" ] || continue
-      if command -v strip >/dev/null 2>&1; then
-        strip --strip-debug "$f" 2>/dev/null || true
-      fi
-      if command -v ${target}-strip >/dev/null 2>&1; then
-        ${target}-strip --strip-debug "$f" 2>/dev/null || true
-      fi
-    done
   ''

@@ -288,6 +288,7 @@ bash.runCommand "${pname}-${version}"
         CC=cc \
           CPPFLAGS="-I${gmp}/include -I${mpfr}/include -I${mpc}/include -I${zlib}/include" \
           LDFLAGS="-L${gmp}/lib -L${mpfr}/lib -L${mpc}/lib -L${zlib}/lib" \
+          CFLAGS="-g0 -O2" \
           ${bash}/bin/bash ../../$dir/configure \
             --prefix=''${out} \
             --libdir=''${out}/lib \
@@ -313,11 +314,12 @@ bash.runCommand "${pname}-${version}"
         LIBGCC2_INCLUDES=-I${musl}/include \
         STMP_FIXINC= \
         GMPLIBS="-L${mpc}/lib -lmpc -L${mpfr}/lib -lmpfr -L${gmp}/lib -lgmp" \
-        MAKEINFO=true
+        MAKEINFO=true \
+        CFLAGS="-g0 -O2"
     done
 
     ${gnumake}/bin/make -j "$NIX_BUILD_CORES" -C build/libgcc PATH="$PATH:../gcc" CC=../gcc/xgcc \
-      host_subdir=build CFLAGS="-I../gcc/include -I${musl}/include"
+      host_subdir=build CFLAGS="-O2 -g0 -I../gcc/include -I${musl}/include"
 
     ${gnumake}/bin/make -j "$NIX_BUILD_CORES" -C build/libstdc++-v3 PATH="$PATH:$PWD/build/gcc" \
       CXXFLAGS="-I$PWD/build/gcc/include -I${musl}/include"
@@ -335,15 +337,4 @@ bash.runCommand "${pname}-${version}"
     mv ''${out}/lib/gcc/${target}/4.0.4/include/* ''${out}/lib/gcc/${target}/${version}/include/
     rmdir ''${out}/lib/gcc/${target}/4.0.4/include
     mv ''${out}/lib/gcc/${target}/4.0.4/* ''${out}/lib/gcc/${target}/${version}/
-    # Strip debug symbols from toolchain artifacts to keep bootstrap outputs small.
-    shopt -s nullglob globstar
-    for f in ''${out}/bin/**/* ''${out}/lib/**/* ''${out}/libexec/**/*; do
-      [ -f "$f" ] || continue
-      if command -v strip >/dev/null 2>&1; then
-        strip --strip-debug "$f" 2>/dev/null || true
-      fi
-      if command -v ${target}-strip >/dev/null 2>&1; then
-        ${target}-strip --strip-debug "$f" 2>/dev/null || true
-      fi
-    done
   ''

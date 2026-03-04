@@ -228,15 +228,4 @@ bash.runCommand "${pname}-${version}"
     for f in *; do
       ln -s "''${out}/bin/''${f}" "${target}-''${f}"
     done
-    # Strip debug symbols from toolchain artifacts to keep bootstrap outputs small.
-    shopt -s nullglob globstar
-    for f in ''${out}/bin/**/* ''${out}/lib/**/* ''${out}/libexec/**/*; do
-      [ -f "$f" ] || continue
-      if command -v strip >/dev/null 2>&1; then
-        strip --strip-debug "$f" 2>/dev/null || true
-      fi
-      if command -v ${target}-strip >/dev/null 2>&1; then
-        ${target}-strip --strip-debug "$f" 2>/dev/null || true
-      fi
-    done
   ''
