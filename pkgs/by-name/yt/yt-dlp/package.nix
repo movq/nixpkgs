@@ -7,7 +7,6 @@
   fetchFromGitHub,
   ffmpeg-headless,
   installShellFiles,
-  pandoc,
   rtmpdump,
   atomicparsleySupport ? true,
   ffmpegSupport ? true,
@@ -49,7 +48,6 @@ python3Packages.buildPythonApplication rec {
 
   nativeBuildInputs = [
     installShellFiles
-    pandoc
   ];
 
   # expose optional-dependencies, but provide all features
@@ -83,10 +81,6 @@ python3Packages.buildPythonApplication rec {
   '';
 
   postBuild = ''
-    python devscripts/prepare_manpage.py yt-dlp.1.temp.md
-    pandoc -s -f markdown-smart -t man yt-dlp.1.temp.md -o yt-dlp.1
-    rm yt-dlp.1.temp.md
-
     mkdir -p completions/{bash,fish,zsh}
     python devscripts/bash-completion.py completions/bash/yt-dlp
     python devscripts/zsh-completion.py completions/zsh/_yt-dlp
@@ -121,8 +115,6 @@ python3Packages.buildPythonApplication rec {
   '';
 
   postInstall = ''
-    installManPage yt-dlp.1
-
     installShellCompletion \
       --bash completions/bash/yt-dlp \
       --fish completions/fish/yt-dlp.fish \
