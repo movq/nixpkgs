@@ -23,7 +23,17 @@ rustPlatform.buildRustPackage (finalAttrs: {
     hash = "sha256-FXbQyKmh/CG/TsRi9yq9L8bVbQ39u6PRLZIet3d/bjA=";
   };
 
-  cargoHash = "sha256-VvgGnAPCvcBmbP2Aw7tdJcjfo+011u4Pqx1pKiiWISA=";
+  cargoPatches = [
+    ./0001-git-attributes-add-git-attributes-file-support.patch
+  ];
+
+  patches = [
+    ./0002-git-lfs-add-ignore-filters-option.patch
+    ./0003-git-lfs-access-git-attributes-to-ignore-filtered-fil.patch
+    ./0004-Fix-submodules.patch
+  ];
+
+  cargoHash = "sha256-Cc2TX6Ws48+uEIcxWNSBFg5lgCeGDb0iZYOOy4uMIAo=";
 
   nativeBuildInputs = [
     installShellFiles
