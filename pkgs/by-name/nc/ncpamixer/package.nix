@@ -6,7 +6,6 @@
   cmake,
   ncurses,
   libpulseaudio,
-  pandoc,
   pkg-config,
 }:
 
@@ -39,7 +38,6 @@ stdenv.mkDerivation (finalAttrs: {
 
   nativeBuildInputs = [
     cmake
-    pandoc
     pkg-config
   ];
 
