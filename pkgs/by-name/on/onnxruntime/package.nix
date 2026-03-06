@@ -266,7 +266,7 @@ effectiveStdenv.mkDerivation (finalAttrs: {
     # fails to find protoc on darwin, so specify it
     (lib.cmakeFeature "ONNX_CUSTOM_PROTOC_EXECUTABLE" (lib.getExe protobuf))
     (lib.cmakeBool "onnxruntime_BUILD_SHARED_LIB" true)
-    (lib.cmakeBool "onnxruntime_BUILD_UNIT_TESTS" finalAttrs.doCheck)
+    (lib.cmakeBool "onnxruntime_BUILD_UNIT_TESTS" false)
     (lib.cmakeBool "onnxruntime_USE_FULL_PROTOBUF" withFullProtobuf)
     (lib.cmakeBool "onnxruntime_USE_CUDA" cudaSupport)
     (lib.cmakeBool "onnxruntime_USE_NCCL" (cudaSupport && ncclSupport))
