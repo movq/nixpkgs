@@ -1,0 +1,39 @@
+From f51fc0eb2c61a929cf05fcbdf40edf5ae083ee10 Mon Sep 17 00:00:00 2001
+From: Mike Jones <mike@mjones.org>
+Date: Tue, 3 Feb 2026 19:09:19 +0000
+Subject: [PATCH 4/4] Fix submodules
+
+---
+ lib/src/local_working_copy.rs | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+
+diff --git a/lib/src/local_working_copy.rs b/lib/src/local_working_copy.rs
+index ef336ed41..f8abc91eb 100644
+--- a/lib/src/local_working_copy.rs
++++ b/lib/src/local_working_copy.rs
+@@ -2303,6 +2303,22 @@ impl TreeState {
+ 
+             // If the path was present, check reserved path first and delete it.
+             let present_file_deleted = before.is_present() && remove_old_file(&disk_path)?;
++
++            // If we're checking out to a submodule and the directory already exists
++            // on disk as a nested repo, record it as a GitSubmodule file state.
++            // This handles the case where a submodule directory persists after
++            // switching away from a commit that had it, and we're now switching back.
++            // See https://github.com/jj-vcs/jj/issues/4349
++            if !present_file_deleted && matches!(&after, MaterializedTreeValue::GitSubmodule(_)) {
++                let dominated_by_reserved = RESERVED_DIR_NAMES
++                    .iter()
++                    .any(|name| disk_path.join(name).symlink_metadata().is_ok());
++                if dominated_by_reserved {
++                    changed_file_states.push((path, FileState::for_gitsubmodule()));
++                    return Ok(());
++                }
++            }
++
+             // If not, create temporary file to test the path validity.
+             if !present_file_deleted && !can_create_new_file(&disk_path)? {
+                 changed_file_states.push((path, FileState::placeholder()));
+-- 
+2.53.0
+
