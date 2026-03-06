@@ -549,17 +549,13 @@ rec {
       scriptName = replaceStrings [ "\\" "@" ] [ "-" "_" ] (shellEscape name);
       out =
         (
-          if !enableStrictShellChecks then
-            pkgs.writeShellScriptBin scriptName ''
-              set -e
+          # Intentionally ignore enableStrictShellChecks here to avoid
+          # pulling shellcheck (and ghc) into system builds through unit scripts.
+          pkgs.writeShellScriptBin scriptName ''
+            set -e
 
-              ${text}
-            ''
-          else
-            pkgs.writeShellApplication {
-              name = scriptName;
-              inherit text;
-            }
+            ${text}
+          ''
         ).overrideAttrs
           (_: {
             # The derivation name is different from the script file name
