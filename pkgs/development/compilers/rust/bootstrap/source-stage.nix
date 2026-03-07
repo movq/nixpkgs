@@ -36,6 +36,7 @@ let
     "--enable-local-rust"
     "--disable-docs"
     "--enable-locked-deps"
+    "--enable-llvm-link-shared"
     "--enable-vendor"
     "--set=build.cargo=${previous.cargo}/bin/cargo"
     "--set=build.rustc=${previous.rustc-unwrapped}/bin/rustc"
