@@ -56,7 +56,6 @@ in
   nodejs,
   perl,
   pkg-config,
-  pkgsCross, # wasm32 rlbox
   python3,
   runCommand,
   rustc,
@@ -232,16 +231,6 @@ let
       bintools = if ltoSupport then buildPackages.rustc.llvmPackages.bintools else stdenv.cc.bintools;
     }
   );
-
-  # Compile the wasm32 sysroot to build the RLBox Sandbox
-  # https://hacks.mozilla.org/2021/12/webassembly-and-back-again-fine-grained-sandboxing-in-firefox-95/
-  # We only link c++ libs here, our compiler wrapper can find wasi libc and crt itself.
-  wasiSysRoot = runCommand "wasi-sysroot" { } ''
-    mkdir -p $out/lib/wasm32-wasi
-    for lib in ${pkgsCross.wasi32.llvmPackages.libcxx}/lib/*; do
-      ln -s $lib $out/lib/wasm32-wasi
-    done
-  '';
 
   distributionIni =
     let
@@ -419,10 +408,6 @@ buildStdenv.mkDerivation {
 
     # Use our own python
     export MACH_BUILD_PYTHON_NATIVE_PACKAGE_SOURCE=system
-
-    # RBox WASM Sandboxing
-    export WASM_CC=${pkgsCross.wasi32.stdenv.cc}/bin/${pkgsCross.wasi32.stdenv.cc.targetPrefix}cc
-    export WASM_CXX=${pkgsCross.wasi32.stdenv.cc}/bin/${pkgsCross.wasi32.stdenv.cc.targetPrefix}c++
   ''
   + lib.optionalString pgoSupport ''
     if [ -e "$TMPDIR/merged.profdata" ]; then
@@ -478,7 +463,7 @@ buildStdenv.mkDerivation {
     "--with-app-name=${binaryName}"
     "--with-distribution-id=org.nixos"
     "--with-libclang-path=${lib.getLib llvmPackagesBuildBuild.libclang}/lib"
-    "--with-wasi-sysroot=${wasiSysRoot}"
+    "--without-wasm-sandboxed-libraries"
     # for firefox, host is buildPlatform, target is hostPlatform
     "--host=${buildStdenv.buildPlatform.config}"
     "--target=${buildStdenv.hostPlatform.config}"
@@ -722,7 +707,6 @@ buildStdenv.mkDerivation {
     inherit gssSupport;
     inherit tests;
     inherit gtk3;
-    inherit wasiSysRoot;
     version = packageVersion;
   }
   // extraPassthru;

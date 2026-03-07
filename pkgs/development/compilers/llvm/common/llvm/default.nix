@@ -31,7 +31,7 @@
     # broken for Ampere eMAG 8180 (c2.large.arm on Packet) #56245
     # broken for the armv7l builder
     && !stdenv.hostPlatform.isAarch,
-  enablePolly ? true,
+  enablePolly ? false,
   enableTerminfo ? true,
   devExtraCmakeFlags ? [ ],
   getVersionFile,
@@ -445,13 +445,13 @@ stdenv.mkDerivation (
       flagsForLlvmConfig
       ++ [
         (lib.cmakeBool "LLVM_INSTALL_UTILS" true) # Needed by rustc
-        (lib.cmakeBool "LLVM_BUILD_TESTS" finalAttrs.finalPackage.doCheck)
+        (lib.cmakeBool "LLVM_BUILD_TESTS" false)
         (lib.cmakeBool "LLVM_ENABLE_FFI" true)
         (lib.cmakeFeature "LLVM_HOST_TRIPLE" stdenv.hostPlatform.config)
         (lib.cmakeFeature "LLVM_DEFAULT_TARGET_TRIPLE" stdenv.hostPlatform.config)
         (lib.cmakeBool "LLVM_ENABLE_DUMP" true)
         (lib.cmakeBool "LLVM_ENABLE_TERMINFO" enableTerminfo)
-        (lib.cmakeBool "LLVM_INCLUDE_TESTS" finalAttrs.finalPackage.doCheck)
+        (lib.cmakeBool "LLVM_INCLUDE_TESTS" false)
       ]
       ++ optionals stdenv.hostPlatform.isStatic [
         # Disables building of shared libs, -fPIC is still injected by cc-wrapper
@@ -522,6 +522,14 @@ stdenv.mkDerivation (
               )
             )
           ]
+      ++ [
+        (
+          lib.cmakeFeature "LLVM_TARGETS_TO_BUILD" (
+            if lib.versions.major release_version == "21" then "X86;AMDGPU" else "X86"
+          )
+        )
+        (lib.cmakeBool "LLVM_INCLUDE_BENCHMARKS" false)
+      ]
       ++ devExtraCmakeFlags;
 
     postInstall = ''
@@ -532,6 +540,13 @@ stdenv.mkDerivation (
         --replace-fail "$out/bin/llvm-config" "$dev/bin/llvm-config"
       substituteInPlace "$dev/lib/cmake/llvm/LLVMConfig.cmake" \
         --replace-fail 'set(LLVM_BINARY_DIR "''${LLVM_INSTALL_PREFIX}")' 'set(LLVM_BINARY_DIR "'"$lib"'")'
+    ''
+    + optionalString enableSharedLibraries ''
+      # Keep CMake package imports usable after deleting LLVM component archives.
+      substituteInPlace "$dev/lib/cmake/llvm/LLVMExports.cmake" \
+        --replace-fail 'if(NOT EXISTS "''${_cmake_file}")' \
+          'if(NOT EXISTS "''${_cmake_file}" AND NOT _cmake_file MATCHES "[.]a$")'
+      rm -f "$lib"/lib/*.a
     ''
     + optionalString (stdenv.hostPlatform.isDarwin && enableSharedLibraries) ''
       ln -s $lib/lib/libLLVM.dylib $lib/lib/libLLVM-${release_version}.dylib

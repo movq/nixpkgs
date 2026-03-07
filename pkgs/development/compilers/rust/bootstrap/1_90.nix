@@ -86,8 +86,27 @@ rec {
         --replace-quiet "tar.gz" "tar.xz" \
         --replace-quiet "xzf" "xf"
 
-      sed -i '/^LLVM_CONFIG/s|=.*|= ${llvmConfig}|' minicargo.mk
-      sed -i '/^LLVM_CONFIG/s|=.*|= ${llvmConfig}|' run_rustc/Makefile
+      # `rustc_llvm` in bootstrap may pass `--link-static`; force shared mode as
+      # the final link mode so bootstrap works without LLVM *.a files.
+      cat > llvm-config-shared <<'EOF'
+#!/bin/sh
+set -eu
+needs_link_mode=0
+for arg in "$@"; do
+  case "$arg" in
+    --libs|--libnames|--system-libs|--ldflags) needs_link_mode=1 ;;
+  esac
+done
+if [ "$needs_link_mode" -eq 1 ]; then
+  exec ${llvmConfig} "$@" --link-shared
+else
+  exec ${llvmConfig} "$@"
+fi
+EOF
+      chmod +x llvm-config-shared
+
+      sed -i '/^LLVM_CONFIG/s|=.*|= $(abspath llvm-config-shared)|' minicargo.mk
+      sed -i '/^LLVM_CONFIG/s|=.*|= $(abspath ../llvm-config-shared)|' run_rustc/Makefile
     '';
 
     buildPhase = ''
@@ -105,7 +124,8 @@ rec {
       export OUTDIR_SUF=-${version}
       export RUSTC_TARGET=${rustTarget}
       export MRUSTC_PATH=${mrustc}/bin/mrustc
-      export LLVM_CONFIG=${llvmConfig}
+      export LLVM_CONFIG="$PWD/llvm-config-shared"
+      export LLVM_LINK_SHARED=1
 
       make -f minicargo.mk PARLEVEL="$NIX_BUILD_CORES" RUSTCSRC
       make -f minicargo.mk PARLEVEL="$NIX_BUILD_CORES" LIBS

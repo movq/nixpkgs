@@ -9,6 +9,7 @@
   ninja,
   libxml2,
   libllvm,
+  enableSharedLibraries ? !stdenv.hostPlatform.isStatic,
   release_version,
   version,
   python3,
@@ -123,6 +124,12 @@ stdenv.mkDerivation (
       # Make sure clang passes the correct location of libLTO to ld64
       substituteInPlace lib/Driver/ToolChains/Darwin.cpp \
         --replace-fail 'StringRef P = llvm::sys::path::parent_path(D.Dir);' 'StringRef P = "${lib.getLib libllvm}";'
+      # We provide CLANG_TABLEGEN from buildLlvmPackages.tblgen, so avoid
+      # building a local clang-tblgen that would require removed LLVM *.a.
+      substituteInPlace utils/TableGen/CMakeLists.txt \
+        --replace-fail 'target_link_libraries(clang-tblgen PRIVATE clangSupport_tablegen)' \
+          'target_link_libraries(clang-tblgen PRIVATE clangSupport_tablegen)
+set_target_properties(clang-tblgen PROPERTIES EXCLUDE_FROM_ALL ON)'
       (cd tools && ln -s ../../clang-tools-extra extra)
     ''
     + lib.optionalString stdenv.hostPlatform.isMusl ''
@@ -168,13 +175,20 @@ stdenv.mkDerivation (
       patchShebangs $python/bin
 
       mkdir -p $dev/bin
-      cp bin/clang-tblgen $dev/bin
+      cp ${buildLlvmPackages.tblgen}/bin/clang-tblgen $dev/bin
     ''
     + lib.optionalString enableClangToolsExtra ''
-      cp bin/clang-tidy-confusable-chars-gen $dev/bin
+      cp ${buildLlvmPackages.tblgen}/bin/clang-tidy-confusable-chars-gen $dev/bin
     ''
     + lib.optionalString (enableClangToolsExtra && lib.versionOlder release_version "20") ''
-      cp bin/clang-pseudo-gen $dev/bin
+      cp ${buildLlvmPackages.tblgen}/bin/clang-pseudo-gen $dev/bin
+    ''
+    + lib.optionalString enableSharedLibraries ''
+      # Keep CMake package imports usable after deleting libclang archives.
+      substituteInPlace "$dev/lib/cmake/clang/ClangTargets.cmake" \
+        --replace-fail 'if(NOT EXISTS "''${_cmake_file}")' \
+          'if(NOT EXISTS "''${_cmake_file}" AND NOT _cmake_file MATCHES "[.]a$")'
+      rm -f "$lib"/lib/*.a
     '';
 
     env =

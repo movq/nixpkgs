@@ -151,10 +151,6 @@ stdenv.mkDerivation (finalAttrs: {
         concatStringsSep "," (
           # Other targets that don't need any extra dependencies to build.
           optionals (!fastCross) [
-            "wasm32-unknown-unknown"
-            "wasm32v1-none"
-            "bpfel-unknown-none"
-            "bpfeb-unknown-none"
           ]
           # (build!=target): When cross-building a compiler we need to add
           # the build platform as well so rustc can compile build.rs

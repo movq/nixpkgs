@@ -58,8 +58,8 @@
   withCelt ? withFullDeps, # CELT decoder
   withChromaprint ? withFullDeps, # Audio fingerprinting
   withCodec2 ? withFullDeps, # codec2 en/decoding
-  withCuda ? withFullDeps && withNvcodec,
-  withCudaLLVM ? withHeadlessDeps,
+  withCuda ? false,
+  withCudaLLVM ? false,
   withCudaNVCC ? withFullDeps && withUnfree && config.cudaSupport,
   withCuvid ? withHeadlessDeps && withNvcodec,
   withDav1d ? withHeadlessDeps, # AV1 decoder (focused on speed and correctness)

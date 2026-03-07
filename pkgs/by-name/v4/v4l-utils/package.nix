@@ -18,7 +18,7 @@
   udevCheckHook,
   withUtils ? true,
   withGUI ? true,
-  withBPF ? true,
+  withBPF ? false,
   alsa-lib,
   libGLU,
   qt6Packages,
