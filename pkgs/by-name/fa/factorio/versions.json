@@ -51,14 +51,14 @@
     "expansion": {
       "experimental": {
         "candidateHashFilenames": [
-          "factorio-space-age_linux_2.0.73.tar.xz"
+          "factorio-space-age_linux_2.0.76.tar.xz"
         ],
-        "name": "factorio_expansion_x64-2.0.73.tar.xz",
+        "name": "factorio_expansion_x64-2.0.76.tar.xz",
         "needsAuth": true,
-        "sha256": "85d7223258f0001cd943004f30cb4d4f4c1a05d1f0fd3d19e05bc42c42b0d7a4",
+        "sha256": "dc24bbbc1b6a619e4425d9a720bcfafce3463d908ab369a6cd1bee1a99332b4f",
         "tarDirectory": "x64",
-        "url": "https://factorio.com/get-download/2.0.73/expansion/linux64",
-        "version": "2.0.73"
+        "url": "https://factorio.com/get-download/2.0.76/expansion/linux64",
+        "version": "2.0.76"
       },
       "stable": {
         "candidateHashFilenames": [

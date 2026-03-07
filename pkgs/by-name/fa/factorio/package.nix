@@ -16,7 +16,7 @@
   libxkbcommon,
   makeDesktopItem,
   makeWrapper,
-  releaseType ? "alpha",
+  releaseType ? "expansion",
   stdenv,
   wayland,
 
@@ -24,7 +24,7 @@
   versionsJson ? ./versions.json,
   username ? "",
   token ? "", # get/reset token at https://factorio.com/profile
-  experimental ? false, # true means to always use the latest branch
+  experimental ? true, # true means to always use the latest branch
   ...
 }@args:
 
