@@ -90,7 +90,7 @@
 
   withAcl ? true,
   withAnalyze ? true,
-  withApparmor ? true,
+  withApparmor ? false,
   withAudit ? true,
   # compiles systemd-boot, assumes EFI is available.
   withBootloader ?
@@ -102,33 +102,17 @@
   withCoredump ? true,
   withCryptsetup ? true,
   withRepart ? true,
-  withDocumentation ? true,
+  withDocumentation ? false,
   withEfi ? stdenv.hostPlatform.isEfi,
-  withFido2 ? true,
-  withFirstboot ? true,
+  withFido2 ? false,
+  withFirstboot ? false,
   withGcrypt ? true,
-  withHomed ? true,
+  withHomed ? false,
   withHostnamed ? true,
   withHwdb ? true,
   withImportd ? true,
   withKmod ? true,
-  withLibBPF ?
-    lib.versionAtLeast buildPackages.llvmPackages.clang.version "10.0"
-    # assumes hard floats
-    && (
-      stdenv.hostPlatform.isAarch
-      ->
-        stdenv.hostPlatform.parsed.cpu ? version
-        && lib.versionAtLeast stdenv.hostPlatform.parsed.cpu.version "6"
-    )
-    # see https://github.com/NixOS/nixpkgs/pull/194149#issuecomment-1266642211
-    && !stdenv.hostPlatform.isMips64
-    # https://reviews.llvm.org/D43106#1019077
-    && (stdenv.hostPlatform.isRiscV32 -> stdenv.cc.isClang)
-    # buildPackages.targetPackages.llvmPackages is the same as llvmPackages,
-    # but we do it this way to avoid taking llvmPackages as an input, and
-    # risking making it too easy to ignore the above comment about llvmPackages.
-    && lib.meta.availableOn stdenv.hostPlatform buildPackages.targetPackages.llvmPackages.compiler-rt,
+  withLibBPF ? false,
   withLibidn2 ? true,
   withLocaled ? true,
   withLogind ? true,
@@ -143,7 +127,7 @@
   withPCRE2 ? true,
   withPolkit ? true,
   withPortabled ? true,
-  withQrencode ? true,
+  withQrencode ? false,
   withRemote ? true,
   withResolved ? true,
   withShellCompletions ? true,
@@ -151,7 +135,7 @@
   withSysupdate ? true,
   withTimedated ? true,
   withTimesyncd ? true,
-  withTpm2Tss ? true,
+  withTpm2Tss ? false,
   # adds python to closure which is too much by default
   withUkify ? false,
   withUserDb ? true,
