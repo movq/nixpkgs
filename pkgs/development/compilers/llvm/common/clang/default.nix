@@ -143,7 +143,8 @@ set_target_properties(clang-tblgen PROPERTIES EXCLUDE_FROM_ALL ON)'
       "python"
     ];
 
-    separateDebugInfo = stdenv.buildPlatform.is64bit; # OOMs on 32 bit
+    # Do not keep split debug symbols for clang; this output is very large.
+    separateDebugInfo = false;
 
     postInstall = ''
       ln -sv $out/bin/clang $out/bin/cpp
