@@ -212,6 +212,44 @@ in
           ];
         };
 
+        # Preserve upstream kernels above and wire default package sets to these
+        # manual-config variants.
+        linux_6_12_custom = manualConfig {
+          inherit (linux_6_12)
+            version
+            modDirVersion
+            src
+            kernelPatches
+            stdenv
+            ;
+          configfile = ../os-specific/linux/kernel/configs/mike-6.12.config;
+          allowImportFromDerivation = false;
+        };
+
+        linux_6_18_custom = manualConfig {
+          inherit (linux_6_18)
+            version
+            modDirVersion
+            src
+            kernelPatches
+            stdenv
+            ;
+          configfile = ../os-specific/linux/kernel/configs/mike-6.18.config;
+          allowImportFromDerivation = false;
+        };
+
+        linux_6_19_custom = manualConfig {
+          inherit (linux_6_19)
+            version
+            modDirVersion
+            src
+            kernelPatches
+            stdenv
+            ;
+          configfile = ../os-specific/linux/kernel/configs/mike-6.19.config;
+          allowImportFromDerivation = false;
+        };
+
         linux_testing =
           let
             testing = callPackage ../os-specific/linux/kernel/mainline.nix {
@@ -736,9 +774,9 @@ in
     linux_5_15 = recurseIntoAttrs (packagesFor kernels.linux_5_15);
     linux_6_1 = recurseIntoAttrs (packagesFor kernels.linux_6_1);
     linux_6_6 = recurseIntoAttrs (packagesFor kernels.linux_6_6);
-    linux_6_12 = recurseIntoAttrs (packagesFor kernels.linux_6_12);
-    linux_6_18 = recurseIntoAttrs (packagesFor kernels.linux_6_18);
-    linux_6_19 = recurseIntoAttrs (packagesFor kernels.linux_6_19);
+    linux_6_12 = recurseIntoAttrs (packagesFor kernels.linux_6_12_custom);
+    linux_6_18 = recurseIntoAttrs (packagesFor kernels.linux_6_18_custom);
+    linux_6_19 = recurseIntoAttrs (packagesFor kernels.linux_6_19_custom);
   }
   // lib.optionalAttrs config.allowAliases {
     linux_4_19 = throw "linux 4.19 was removed because it will reach its end of life within 24.11"; # Added 2024-09-21
