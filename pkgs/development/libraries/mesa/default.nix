@@ -51,9 +51,15 @@
   enablePatentEncumberedCodecs ? true,
   withValgrind ? lib.meta.availableOn stdenv.hostPlatform valgrind-light,
 
-  # We enable as many drivers as possible here, to build cross tools
-  # and support emulation use cases (emulated x86_64 on aarch64, etc)
-  galliumDrivers ? [
+  # On x86, keep defaults focused on desktop Intel/Nvidia/AMD GPUs.
+  # Elsewhere, enable as many drivers as possible for cross/emulation use cases.
+  galliumDrivers ? if stdenv.hostPlatform.isx86 then [
+    "iris" # new Intel (Broadwell+)
+    "llvmpipe" # software renderer
+    "nouveau" # Nvidia
+    "radeonsi" # new AMD (GCN+)
+    "virgl" # QEMU virtualized GPU (aka VirGL)
+  ] else [
     "asahi" # Apple AGX
     "crocus" # Intel legacy
     "d3d12" # WSL emulated GPU (aka Dozen)
@@ -78,20 +84,27 @@
     "virgl" # QEMU virtualized GPU (aka VirGL)
     "zink" # generic OpenGL over Vulkan, experimental
   ],
-  vulkanDrivers ? [
-    "amd" # AMD (aka RADV)
-    "asahi" # Apple AGX
-    "broadcom" # Broadcom VC5 (Raspberry Pi 4, aka V3D)
-    "freedreno" # Qualcomm Adreno (all Qualcomm SoCs)
-    "gfxstream" # Android virtualized GPU
-    "imagination" # PowerVR Rogue (currently N/A)
-    "intel_hasvk" # Intel Haswell/Broadwell, "legacy" Vulkan driver (https://www.phoronix.com/news/Intel-HasVK-Drop-Dead-Code)
-    "intel" # new Intel (aka ANV)
-    "microsoft-experimental" # WSL virtualized GPU (aka DZN/Dozen)
-    "nouveau" # Nouveau (aka NVK)
-    "panfrost" # ARM Mali Midgard and up (T/G series)
-    "swrast" # software renderer (aka Lavapipe)
-  ]
+  vulkanDrivers ? (
+    if stdenv.hostPlatform.isx86 then [
+      "amd" # AMD (aka RADV)
+      "intel" # new Intel (aka ANV)
+      "nouveau" # Nouveau (aka NVK)
+      "swrast" # software renderer (aka Lavapipe)
+    ] else [
+      "amd" # AMD (aka RADV)
+      "asahi" # Apple AGX
+      "broadcom" # Broadcom VC5 (Raspberry Pi 4, aka V3D)
+      "freedreno" # Qualcomm Adreno (all Qualcomm SoCs)
+      "gfxstream" # Android virtualized GPU
+      "imagination" # PowerVR Rogue (currently N/A)
+      "intel_hasvk" # Intel Haswell/Broadwell, "legacy" Vulkan driver (https://www.phoronix.com/news/Intel-HasVK-Drop-Dead-Code)
+      "intel" # new Intel (aka ANV)
+      "microsoft-experimental" # WSL virtualized GPU (aka DZN/Dozen)
+      "nouveau" # Nouveau (aka NVK)
+      "panfrost" # ARM Mali Midgard and up (T/G series)
+      "swrast" # software renderer (aka Lavapipe)
+    ]
+  )
   ++
     lib.optionals
       (stdenv.hostPlatform.isAarch -> lib.versionAtLeast stdenv.hostPlatform.parsed.cpu.version "6")
@@ -119,6 +132,8 @@
 
 let
   rustDeps = lib.importJSON ./wraps.json;
+  enableSpirv2dxilOutput =
+    lib.elem "d3d12" galliumDrivers || lib.elem "microsoft-experimental" vulkanDrivers;
 
   fetchDep =
     dep:
@@ -172,6 +187,8 @@ stdenv.mkDerivation {
     # OpenCL drivers pull in ~1G of extra LLVM stuff, so don't install them
     # if the user didn't explicitly ask for it
     "opencl"
+  ]
+  ++ lib.optionals enableSpirv2dxilOutput [
     # the Dozen drivers depend on libspirv2dxil, but link it statically, and
     # libspirv2dxil itself is pretty chonky, so relocate it to its own output in
     # case anything wants to use it at some point
@@ -248,12 +265,17 @@ stdenv.mkDerivation {
   ++ lib.optionals enablePatentEncumberedCodecs [
     (lib.mesonOption "video-codecs" "all")
   ]
-  ++ lib.optionals (!needNativeCLC) [
-    # Build and install extra tools for cross
-    (lib.mesonOption "tools" "asahi,panfrost")
-    (lib.mesonBool "install-mesa-clc" true)
-    (lib.mesonBool "install-precomp-compiler" true)
-  ]
+  ++ lib.optionals (!needNativeCLC) (
+    [
+      # Build and install extra tools for cross
+      (lib.mesonBool "install-mesa-clc" true)
+      (lib.mesonBool "install-precomp-compiler" true)
+    ]
+    ++ lib.optionals (!stdenv.hostPlatform.isx86) [
+      # On non-x86, keep Asahi/Panfrost precompilers available in cross_tools.
+      (lib.mesonOption "tools" "asahi,panfrost")
+    ]
+  )
   ++ lib.optionals needNativeCLC [
     (lib.mesonOption "mesa-clc" "system")
     (lib.mesonOption "precomp-compiler" "system")
@@ -353,8 +375,10 @@ stdenv.mkDerivation {
     mkdir -p $opencl/etc/OpenCL/vendors/
     echo $opencl/lib/libRusticlOpenCL.so > $opencl/etc/OpenCL/vendors/rusticl.icd
 
-    moveToOutput bin/spirv2dxil $spirv2dxil
-    moveToOutput "lib/libspirv_to_dxil*" $spirv2dxil
+    ${lib.optionalString enableSpirv2dxilOutput ''
+      moveToOutput bin/spirv2dxil $spirv2dxil
+      moveToOutput "lib/libspirv_to_dxil*" $spirv2dxil
+    ''}
   '';
 
   postFixup = ''
