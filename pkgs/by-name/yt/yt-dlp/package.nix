@@ -3,7 +3,7 @@
   stdenvNoCC,
   python3Packages,
   atomicparsley,
-  deno,
+  nodejs-slim,
   fetchFromGitHub,
   ffmpeg-headless,
   installShellFiles,
@@ -36,11 +36,18 @@ python3Packages.buildPythonApplication rec {
     substituteInPlace yt_dlp/version.py \
       --replace-fail "UPDATE_HINT = None" 'UPDATE_HINT = "Nixpkgs/NixOS likely already contain an updated version.\n       To get it run nix-channel --update or nix flake update in your config directory."'
     ${lib.optionalString javascriptSupport ''
-      # deno is required for full YouTube support (since 2025.11.12).
-      # This makes yt-dlp find deno even if it is used as a python dependency, i.e. in kodiPackages.sendtokodi.
-      # Crafted so people can replace deno with one of the other JS runtimes.
+      # A JavaScript runtime is required for full YouTube support (since 2025.11.12).
+      # This makes yt-dlp find nodejs-slim even if it is used as a python dependency, i.e. in kodiPackages.sendtokodi.
+      # Crafted so people can replace nodejs-slim with one of the other JS runtimes.
+      substituteInPlace yt_dlp/options.py \
+        --replace-fail "default=['deno']" "default=['node']" \
+        --replace-fail 'Only "deno" is enabled by default.' 'Only "node" is enabled by default.' \
+        --replace-fail 'when "deno" is available' 'when "node" is available'
+      substituteInPlace yt_dlp/YoutubeDL.py \
+        --replace-fail "If None, the default runtime of \"deno\" will be enabled." "If None, the default runtime of \"node\" will be enabled." \
+        --replace-fail "self.params['js_runtimes'] = self.params.get('js_runtimes', {'deno': {}})" "self.params['js_runtimes'] = self.params.get('js_runtimes', {'node': {}})"
       substituteInPlace yt_dlp/utils/_jsruntime.py \
-        --replace-fail "path = _determine_runtime_path(self._path, '${deno.meta.mainProgram}')" "path = '${lib.getExe deno}'"
+        --replace-fail "path = _determine_runtime_path(self._path, '${nodejs-slim.meta.mainProgram}')" "path = '${lib.getExe nodejs-slim}'"
     ''}
   '';
 
