@@ -60,7 +60,7 @@ stdenv.mkDerivation (
         "out"
         "dev"
       ];
-    separateDebugInfo = args.separateDebugInfo or true;
+    separateDebugInfo = args.separateDebugInfo or false;
 
     dontWrapQtApps = args.dontWrapQtApps or true;
   }

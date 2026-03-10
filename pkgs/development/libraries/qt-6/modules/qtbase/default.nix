@@ -313,7 +313,7 @@ stdenv.mkDerivation {
     "out"
     "dev"
   ];
-  separateDebugInfo = true;
+  separateDebugInfo = false;
 
   moveToDev = false;
 
