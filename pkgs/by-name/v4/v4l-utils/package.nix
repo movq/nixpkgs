@@ -17,7 +17,7 @@
   udev,
   udevCheckHook,
   withUtils ? true,
-  withGUI ? true,
+  withGUI ? false,
   withBPF ? false,
   alsa-lib,
   libGLU,
