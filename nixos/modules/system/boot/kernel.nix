@@ -332,47 +332,21 @@ in
 
           # Some SATA/PATA stuff.
           "ahci"
-          "sata_nv"
-          "sata_via"
-          "sata_sis"
-          "sata_uli"
-          "ata_piix"
-          "pata_marvell"
 
           # NVMe
           "nvme"
 
           # Standard SCSI stuff.
           "sd_mod"
-          "sr_mod"
-
-          # SD cards and internal eMMC drives.
-          "mmc_block"
 
           # Support USB keyboards, in case the boot fails and we only have
           # a USB keyboard, or for LUKS passphrase prompt.
-          "uhci_hcd"
-          "ehci_hcd"
-          "ehci_pci"
-          "ohci_hcd"
-          "ohci_pci"
           "xhci_hcd"
           "xhci_pci"
-          "usbhid"
           "hid_generic"
-          "hid_lenovo"
-          "hid_apple"
-          "hid_roccat"
-          "hid_logitech_hidpp"
-          "hid_logitech_dj"
-          "hid_microsoft"
-          "hid_cherry"
-          "hid_corsair"
-
         ]
         ++ optionals pkgs.stdenv.hostPlatform.isx86 [
           # Misc. x86 keyboard stuff.
-          "pcips2"
           "atkbd"
           "i8042"
         ]

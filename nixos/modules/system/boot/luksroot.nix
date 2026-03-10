@@ -636,12 +636,9 @@ in
       default = [
         "aes"
         "aes_generic"
-        "blowfish"
-        "twofish"
         "serpent"
         "cbc"
         "xts"
-        "lrw"
         "sha1"
         "sha256"
         "sha512"
