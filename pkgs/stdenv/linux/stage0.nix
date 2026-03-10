@@ -6,7 +6,7 @@
 }:
 let
   useMinimalBootstrapLb = localSystem.system == "x86_64-linux" && localSystem.libc == "glibc";
-  minbootSupported = localSystem.system == "i686-linux" || useMinimalBootstrapLb;
+  minbootSupported = useMinimalBootstrapLb;
 in
 if minbootSupported then
   let
