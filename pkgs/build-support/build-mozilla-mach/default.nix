@@ -121,8 +121,9 @@ in
 
   debugBuild ? false,
 
-  # On 32bit platforms, we disable adding "-g" for easier linking.
-  enableDebugSymbols ? !stdenv.hostPlatform.is32bit,
+  # Disable debug symbols by default to avoid very large -debug outputs.
+  # Individual packages can opt in via `enableDebugSymbols = true`.
+  enableDebugSymbols ? false,
 
   ## optional libraries
 
