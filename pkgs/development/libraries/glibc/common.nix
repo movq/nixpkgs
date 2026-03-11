@@ -188,7 +188,7 @@ stdenv.mkDerivation (
       "--enable-cet${if builtins.isString enableCET then "=${enableCET}" else ""}"
     ]
     ++ lib.optionals withLinuxHeaders [
-      "--enable-kernel=3.10.0" # RHEL 7 and derivatives, seems oldest still supported kernel
+      "--enable-kernel=5.10.0"
     ]
     ++ lib.optionals (stdenv.hostPlatform != stdenv.buildPlatform) [
       (lib.flip lib.withFeature "fp" (
