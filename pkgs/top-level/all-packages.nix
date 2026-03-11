@@ -2150,6 +2150,7 @@ with pkgs;
         lib
         ;
     })
+    cudaPackages_11_8
     cudaPackages_12_6
     cudaPackages_12_8
     cudaPackages_12_9
@@ -2157,6 +2158,8 @@ with pkgs;
     cudaPackages_13_1
     cudaPackages_13_2
     ;
+
+  cudaPackages_11 = recurseIntoAttrs cudaPackages_11_8;
 
   cudaPackages_12 = cudaPackages_12_8;
 
@@ -3895,6 +3898,7 @@ with pkgs;
         extraBuildInputs = lib.optional stdenv.hostPlatform.isDarwin clang.cc;
       };
 
+  gcc11Stdenv = overrideCC gccStdenv buildPackages.gcc11;
   gcc13Stdenv = overrideCC gccStdenv buildPackages.gcc13;
   gcc14Stdenv = overrideCC gccStdenv buildPackages.gcc14;
   gcc15Stdenv = overrideCC gccStdenv buildPackages.gcc15;
@@ -3997,6 +4001,7 @@ with pkgs;
       });
 
   inherit (callPackage ../development/compilers/gcc/all.nix { inherit noSysDirs; })
+    gcc11
     gcc13
     gcc14
     gcc15

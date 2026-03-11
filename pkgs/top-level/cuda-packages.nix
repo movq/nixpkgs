@@ -18,6 +18,27 @@ let
   #   10.13.1), so we use 10.13.0 for all CUDA 12 releases.
   # - linux-aarch64 (pre-Thor Jetson) is historically least supported; we use the latest release available.
 
+  cudaPackages_11_8 =
+    let
+      inherit (cudaPackages_11_8.backendStdenv) hasJetsonCudaCapability;
+    in
+    mkCudaPackages {
+      cublasmp = "0.6.0";
+      cuda = "11.8.0";
+      cudnn = if hasJetsonCudaCapability then "8.9.5" else "8.9.7";
+      cudss = "0.6.0";
+      cuquantum = "25.09.0";
+      cusolvermp = "0.7.0";
+      cusparselt = "0.6.3";
+      cutensor = "2.3.1";
+      nppplus = "0.10.0";
+      nvcomp = "5.0.0.6";
+      nvjpeg2000 = "0.9.0";
+      nvpl = "25.5";
+      nvtiff = "0.5.1";
+      tensorrt = if hasJetsonCudaCapability then "10.7.0" else "10.13.0";
+    };
+
   cudaPackages_12_6 =
     let
       inherit (cudaPackages_12_6.backendStdenv) hasJetsonCudaCapability hostPlatform;
@@ -170,6 +191,7 @@ let
 in
 {
   inherit
+    cudaPackages_11_8
     cudaPackages_12_6
     cudaPackages_12_8
     cudaPackages_12_9
