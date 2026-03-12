@@ -601,7 +601,12 @@ rec {
     platform:
     # x86
     if platform.isx86 then
-      pc
+      if platform.isx86_64 && platform.isLinux then
+        pc // {
+          gcc.arch = "x86-64-v3";
+        }
+      else
+        pc
 
     # ARM
     else if platform.isAarch32 then

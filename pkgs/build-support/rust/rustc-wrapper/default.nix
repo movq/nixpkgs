@@ -13,6 +13,8 @@ runCommand "${rustc-unwrapped.pname}-wrapper-${rustc-unwrapped.version}"
 
     env = {
       sysroot = lib.optionalString (sysroot != null) "--sysroot ${sysroot}";
+      defaultTarget = rustc-unwrapped.stdenv.targetPlatform.rust.rustcTargetSpec;
+      enableX86_64V3TargetCpu = lib.optionalString rustc-unwrapped.stdenv.targetPlatform.isx86_64 "1";
 
       # Upstream rustc still assumes that musl = static[1].  The fix for
       # this is to disable crt-static by default for non-static musl
