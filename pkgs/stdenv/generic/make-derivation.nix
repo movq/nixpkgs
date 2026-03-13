@@ -387,7 +387,7 @@ let
 
       separateDebugInfo' =
         let
-          actualValue = separateDebugInfo && isLinux;
+          actualValue = false;
           conflictingOption =
             attrs ? "disallowedReferences"
             || attrs ? "disallowedRequisites"
