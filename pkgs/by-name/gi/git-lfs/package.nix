@@ -36,7 +36,8 @@ buildGoModule (finalAttrs: {
 
   subPackages = [ "." ];
 
-  preBuild = ''
+  # Run generation only after buildGoModule has populated vendor/.
+  postConfigure = ''
     GOARCH= go generate ./commands
   '';
 
